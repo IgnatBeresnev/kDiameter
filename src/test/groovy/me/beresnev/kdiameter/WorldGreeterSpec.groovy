@@ -2,7 +2,7 @@ package me.beresnev.kdiameter
 
 import spock.lang.Specification
 
-class MainObjectSpec extends Specification {
+class WorldGreeterSpec extends Specification {
 
     def "should return hello world when greeted"() {
         given:
