@@ -1,6 +1,6 @@
 language: groovy
 
-dist: xenial
+dist: trusty
 install: true
 
 jdk:
