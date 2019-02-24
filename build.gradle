@@ -1,10 +1,13 @@
 plugins {
     id 'groovy'
     id 'org.jetbrains.kotlin.jvm' version '1.3.20'
+    id 'com.github.johnrengelman.shadow' version '4.0.4'
 }
 
+apply from: 'gradle/version.gradle'
+
 group 'me.beresnev'
-version '0.0.1'
+version = project.ext.versionInfo.fullVersion()
 
 repositories {
     mavenCentral()
@@ -20,6 +23,10 @@ dependencies {
             [group: 'org.spockframework', name: 'spock-core', version: '1.2-groovy-2.5'],
     )
 }
+
+// build fatJar instead
+jar.enabled = false
+tasks.build.dependsOn tasks.shadowJar
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"

@@ -1,0 +1,27 @@
+Properties versionProperties = new Properties()
+project.file('version.properties').withReader { versionProperties.load(it) }
+
+project.ext.versionInfo = new VersionInfo(
+        versionProperties.getProperty('major'),
+        versionProperties.getProperty('middle'),
+        versionProperties.getProperty('minor'),
+        versionProperties.getProperty('suffix')
+)
+
+class VersionInfo {
+    def major
+    def middle
+    def minor
+    def suffix
+
+    VersionInfo(def major, def middle, def minor, def suffix) {
+        this.major = major
+        this.middle = middle
+        this.minor = minor
+        this.suffix = suffix
+    }
+
+    def fullVersion() {
+        return "$major.$middle.$minor" + (suffix ? "-$suffix" : '')
+    }
+}
