@@ -1,0 +1,14 @@
+<dictionary>
+    <typedefn type-name="Enumerated" type-parent="Integer32"/>
+
+    <avp name="Day-Of-Week" code="563">
+        <type type-name="Enumerated"/>
+        <enum name="SUNDAY" code="0"/>
+        <enum name="MONDAY" code="2"/>
+        <enum name="TUESDAY" code="4"/>
+        <enum name="WEDNESDAY" code="8"/>
+        <enum name="THURSDAY" code="16"/>
+        <enum name="FRIDAY" code="32"/>
+        <enum name="SATURDAY" code="64"/>
+    </avp>
+</dictionary>

@@ -16,6 +16,9 @@ repositories {
 dependencies {
     compile(
             [group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8'],
+            
+            // jcip annotations, such as @ThreadSafe
+            [group: 'net.jcip', name: 'jcip-annotations', version: '1.0'],
     )
 
     testCompile(

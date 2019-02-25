@@ -1,0 +1,5 @@
+<dictionary>
+    <command name="Capabilities-Exchange" code="257" vendor-id="None"/>
+    <command name="Re-Auth" code="258" vendor-id="None"/>
+    <command name="Session-Termination" code="275" vendor-id="None"/>
+</dictionary>
