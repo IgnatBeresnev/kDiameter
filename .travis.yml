@@ -11,7 +11,7 @@ jdk:
 
 script:
   - ./gradlew -version
-  - travis_wait 5 ./gradlew test
+  - travis_wait 10 ./gradlew test
 
 # https://docs.travis-ci.com/user/languages/groovy/#gradle-caching
 before_cache:

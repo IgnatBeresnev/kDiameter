@@ -5,8 +5,13 @@ import me.beresnev.kdiameter.dictionary.representation.AvpRepresentation
 import me.beresnev.kdiameter.dictionary.representation.CommandRepresentation
 import me.beresnev.kdiameter.dictionary.representation.TypeRepresentation
 import me.beresnev.kdiameter.dictionary.representation.VendorRepresentation
-import me.beresnev.kdiameter.extensions.getNullableValue
-import me.beresnev.kdiameter.extensions.getValue
+import me.beresnev.kdiameter.dictionary.representation.attributes.ModalVerbOption
+import me.beresnev.kdiameter.extensions.equalsIgnoreCase
+import me.beresnev.kdiameter.extensions.getAsBinaryOption
+import me.beresnev.kdiameter.extensions.getAsModalVerbOption
+import me.beresnev.kdiameter.extensions.getLong
+import me.beresnev.kdiameter.extensions.getNullableString
+import me.beresnev.kdiameter.extensions.getString
 import me.beresnev.kdiameter.extensions.isEmpty
 import me.beresnev.kdiameter.extensions.iterator
 import net.jcip.annotations.NotThreadSafe
@@ -17,15 +22,16 @@ import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
 @NotThreadSafe
-class XmlDictionary {
-    val types: MutableMap<String, TypeRepresentation> = mutableMapOf()
-    val applications: MutableMap<Long, ApplicationRepresentation> = mutableMapOf() // key is id
+open class XmlDictionary {
 
-    // key is vendor-id (string), not code (int)
-    val vendors: MutableMap<String, VendorRepresentation> = mutableMapOf()
-    val commands: MutableMap<Long, CommandRepresentation> = mutableMapOf() // key is code
+    protected val types: MutableMap<String, TypeRepresentation> = HashMap()
+    protected val applications: MutableMap<Long, ApplicationRepresentation> = HashMap() // key is id
 
-    val avps: MutableMap<Long, MutableList<AvpRepresentation>> = mutableMapOf() // TODO [beresnev] make avpsByName
+    protected val vendors: MutableMap<String, VendorRepresentation> = HashMap() // key is vendor-id (string)
+    protected val commands: MutableMap<Long, CommandRepresentation> = HashMap() // key is code
+
+    protected val avpsByCode: MutableMap<Long, MutableMap<Long, AvpRepresentation>> = HashMap()
+    protected val avpsByName: MutableMap<String, MutableMap<Long, AvpRepresentation>> = HashMap()
 
     fun parse(xmlFile: File) {
         val dbFactory = DocumentBuilderFactory.newInstance()
@@ -41,154 +47,174 @@ class XmlDictionary {
         parseAvps(doc)
     }
 
-    // TODO [beresnev] anonymous classes to lambdas?
+    // <typedefn type-name="OctetString"/>
+    // <typedefn type-name="UTF8String" type-parent="OctetString"/>
     private fun parseTypes(doc: Document) {
-        executeOnAllNamedElements(doc, "typedefn", object : AttributesExecutable {
-            override fun executeOnSingleElementAttributes(attributes: NamedNodeMap) {
-                val typeName = attributes.getValue("type-name")
-                val typeParent = attributes.getNullableValue("type-parent")
+        executeOnAllNamedElementsAttributes(doc, "typedefn") {
+            val typeName = it.getString("type-name")
+            val typeParent = it.getNullableString("type-parent")
 
-                types[typeName] = TypeRepresentation(
-                    typeName,
-                    typeParent = if (typeParent != null) types[typeParent] else null
-                )
-            }
-        })
+            types[typeName] = TypeRepresentation(
+                typeName,
+                typeParent = if (typeParent != null) types[typeParent] else null
+            )
+        }
     }
 
+    // <application id="9" name="Diameter QoS application" uri="http://tools.ietf.org/html/rfc5866"/>
+    // <application id="16777239" name="Juniper Cluster" uri="none"/>
     private fun parseApplications(doc: Document) {
-        executeOnAllNamedElements(doc, "application", object : AttributesExecutable {
-            override fun executeOnSingleElementAttributes(attributes: NamedNodeMap) {
-                val id = attributes.getValue("id").toLong()
-                val uri = attributes.getValue("uri")
+        executeOnAllNamedElementsAttributes(doc, "application") {
+            val id = it.getLong("id")
+            val uri = it.getString("uri")
 
-                applications[id] = ApplicationRepresentation(
-                    id = id,
-                    name = attributes.getValue("name"),
-                    uri = if ("none".equals(uri, ignoreCase = true)) null else uri
-                )
-            }
-        })
+            applications[id] = ApplicationRepresentation(
+                id = id,
+                name = it.getString("name"),
+                uri = if ("none".equalsIgnoreCase(uri)) null else uri
+            )
+        }
     }
 
+    // <vendor vendor-id="Lucent" code="1751" name="Lucent Technologies"/>
     private fun parseVendors(doc: Document) {
-        executeOnAllNamedElements(doc, "vendor", object : AttributesExecutable {
-            override fun executeOnSingleElementAttributes(attributes: NamedNodeMap) {
-                val vendorId = attributes.getValue("vendor-id")
-                vendors[vendorId] = VendorRepresentation(
-                    vendorId = vendorId,
-                    code = attributes.getValue("code").toLong(),
-                    name = attributes.getValue("name")
-                )
-            }
-        })
+        vendors["None"] = VendorRepresentation("None", 0L, "None")
+        executeOnAllNamedElementsAttributes(doc, "vendor") {
+            val vendorId = it.getString("vendor-id")
+            vendors[vendorId] = VendorRepresentation(
+                vendorId = vendorId,
+                code = it.getLong("code"),
+                name = it.getString("name")
+            )
+        }
     }
 
-    /**
-     * Has to be parsed after initializing vendors map
-     * @see XmlDictionary.vendors
-     */
+    // <command name="QoS-Install" code="327" vendor-id="None"/>
     private fun parseCommands(doc: Document) {
-        executeOnAllNamedElements(doc, "command", object : AttributesExecutable {
-            override fun executeOnSingleElementAttributes(attributes: NamedNodeMap) {
-                val code = attributes.getValue("code").toLong()
-                val vendorId = attributes.getValue("vendor-id")
-                commands[code] = CommandRepresentation(
-                    code = code,
-                    name = attributes.getValue("name"),
-                    vendor = if ("none".equals(vendorId, ignoreCase = true)) null else vendors[vendorId]
-                )
-            }
-        })
+        if (vendors.isEmpty()) {
+            throw IllegalStateException("Vendors have to be parsed first for linking")
+        }
+
+        executeOnAllNamedElementsAttributes(doc, "command") {
+            val code = it.getLong("code")
+            val vendorId = it.getString("vendor-id")
+            commands[code] = CommandRepresentation(
+                code = code,
+                name = it.getString("name"),
+                vendor = vendors[vendorId] ?: throw IllegalArgumentException("Unknown vendor id $vendorId")
+            )
+        }
     }
 
+    // <avp name="NAS-Port" code="5" mandatory="must" may-encrypt="yes" protected="may" vendor-bit="mustnot">
+    //     <type type-name="Unsigned32"/>
+    // </avp>
+    // <avp name="Service-Type" code="6" mandatory="must" may-encrypt="yes" protected="may" vendor-bit="mustnot">
+    //     <type type-name="Enumerated"/>
+    //     <enum name="Unknown" code="0"/>
+    //     <enum name="Login" code="1"/>
+    // </avp>
+    // <avp name="Proxy-Info" code="284" mandatory="must" may-encrypt="no" protected="mustnot" vendor-bit="mustnot">
+    //     <grouped>
+    //         <gavp name="Proxy-Host"/>
+    //         <gavp name="Proxy-State"/>
+    //     </grouped>
+    // </avp>
     private fun parseAvps(doc: Document) {
         val avpElements = doc.getElementsByTagName("avp")
         for (avpElementNode in avpElements) {
             val castedAvpElement = (avpElementNode as Element)
             val avpAttributes = castedAvpElement.attributes
 
-            val code = avpAttributes.getValue("code").toLong()
-            avps.getOrPut(code) { mutableListOf() }
-                .add(
-                    AvpRepresentation(
-                        code = code,
-                        name = avpAttributes.getValue("name"),
-                        vendor = extractAvpVendor(avpAttributes),
-                        mandatory = avpAttributes.getNullableValue("mandatory"),
-                        protected = avpAttributes.getNullableValue("protected"),
-                        mayEncrypt = avpAttributes.getNullableValue("may-encrypt"),
-                        vendorBit = avpAttributes.getNullableValue("vendor-bit"),
-                        type = extractAvpType(castedAvpElement),
-                        enumValues = extractEnumValues(castedAvpElement),
-                        groupedAvps = extractGroupedValues(castedAvpElement)
-                    )
-                )
+            val avpRepresentation = AvpRepresentation(
+                code = avpAttributes.getLong("code"),
+                name = avpAttributes.getString("name"),
+                vendor = extractAvpVendor(avpAttributes),
+                mayEncrypt = avpAttributes.getAsBinaryOption("may-encrypt", defaultValue = true),
+                mandatory = avpAttributes.getAsModalVerbOption("mandatory", defaultValue = ModalVerbOption.MAY),
+                protected = avpAttributes.getAsModalVerbOption("protected", defaultValue = ModalVerbOption.MAY),
+                vendorBit = avpAttributes.getAsModalVerbOption("vendor-bit", defaultValue = ModalVerbOption.MAY),
+                type = extractAvpType(castedAvpElement),
+                enumValues = extractEnumValues(castedAvpElement),
+                groupedAvps = extractGroupedValues(castedAvpElement)
+            )
+
+            val vendorCode = avpRepresentation.vendor.code
+            avpsByCode.getOrPut(avpRepresentation.code) { HashMap() }[vendorCode] = avpRepresentation
+            avpsByName.getOrPut(avpRepresentation.name) { HashMap() }[vendorCode] = avpRepresentation
         }
     }
 
-    private fun extractAvpVendor(attributes: NamedNodeMap): VendorRepresentation? {
-        val vendorId = attributes.getNullableValue("vendor-id") ?: return null
-        return vendors[vendorId]
+    /**
+     * @return vendor with vendor-id == "None" if no vendor-id set
+     */
+    private fun extractAvpVendor(attributes: NamedNodeMap): VendorRepresentation {
+        val vendorId = attributes.getNullableString("vendor-id")
+        return (if (vendorId == null) vendors["None"] else vendors[vendorId]) ?: throw IllegalStateException()
     }
 
     private fun extractAvpType(avpElement: Element): TypeRepresentation? {
         val typeElement = avpElement.getElementsByTagName("type")
 
-        val typeName = typeElement.item(0)?.attributes?.getValue("type-name") ?: return null
+        val typeName = typeElement.item(0)?.attributes?.getString("type-name") ?: return null
         return types[typeName]
     }
 
+    // <avp name="Service-Type" code="6" mandatory="must" may-encrypt="yes" protected="may" vendor-bit="mustnot">
+    //     <type type-name="Enumerated"/>
+    //     <enum name="Unknown" code="0"/>
+    //     <enum name="Login" code="1"/>
+    // </avp>
     private fun extractEnumValues(avpElement: Element): List<AvpRepresentation.Enum> {
         val enumElements = avpElement.getElementsByTagName("enum")
         if (enumElements.isEmpty()) return emptyList()
 
-        val enumValues = mutableListOf<AvpRepresentation.Enum>()
-        for (enumElement in enumElements) {
+        val enumValues = ArrayList<AvpRepresentation.Enum>()
+        for (enumElement in enumElements) { // cannot be made into stream since not Iterable<>
             val enumAttributes = enumElement.attributes
             enumValues.add(
                 AvpRepresentation.Enum(
-                    name = enumAttributes.getValue("name"),
-                    code = enumAttributes.getValue("code").toLong()
+                    name = enumAttributes.getString("name"),
+                    code = enumAttributes.getLong("code")
                 )
             )
         }
         return enumValues
     }
 
+    // <avp name="Proxy-Info" code="284" mandatory="must" may-encrypt="no" protected="mustnot" vendor-bit="mustnot">
+    //     <grouped>
+    //         <gavp name="Proxy-Host"/>
+    //         <gavp name="Proxy-State"/>
+    //     </grouped>
+    // </avp>
     private fun extractGroupedValues(avpElement: Element): List<AvpRepresentation.GroupedAvp> {
         val groupedElements = avpElement.getElementsByTagName("grouped")
         if (groupedElements.isEmpty()) {
             return emptyList()
         } else if (groupedElements.length != 1) {
-            // TODO [beresnev] log
+            throw IllegalStateException("Expected one <grouped> within <avp>, got: ${groupedElements.length}")
         }
 
         val groupedElement = (groupedElements.item(0) as Element)
         val groupedAvps = groupedElement.getElementsByTagName("gavp")
         if (groupedAvps.isEmpty()) return emptyList()
 
-        val groupedValues = mutableListOf<AvpRepresentation.GroupedAvp>()
+        val groupedValues = ArrayList<AvpRepresentation.GroupedAvp>()
         for (avp in groupedAvps) {
-            groupedValues.add(
-                AvpRepresentation.GroupedAvp(name = avp.attributes.getValue("name"))
-            )
+            groupedValues.add(AvpRepresentation.GroupedAvp(avp.attributes.getString("name")))
         }
         return groupedValues
     }
 
-    private fun executeOnAllNamedElements(
+    private fun executeOnAllNamedElementsAttributes(
         doc: Document,
         elementName: String,
-        attributesExecutable: AttributesExecutable
+        attributesExecutable: (attributes: NamedNodeMap) -> Unit
     ) {
         val elementsByTagName = doc.getElementsByTagName(elementName)
         elementsByTagName.iterator().forEachRemaining {
-            attributesExecutable.executeOnSingleElementAttributes(it.attributes)
+            attributesExecutable.invoke(it.attributes)
         }
-    }
-
-    private interface AttributesExecutable {
-        fun executeOnSingleElementAttributes(attributes: NamedNodeMap)
     }
 }

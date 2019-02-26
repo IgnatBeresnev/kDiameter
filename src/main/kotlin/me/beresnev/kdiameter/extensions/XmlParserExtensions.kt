@@ -1,16 +1,40 @@
 package me.beresnev.kdiameter.extensions
 
+import me.beresnev.kdiameter.dictionary.representation.attributes.ModalVerbOption
 import net.jcip.annotations.NotThreadSafe
 import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 
-fun NamedNodeMap.getValue(name: String): String {
+fun NamedNodeMap.getLong(name: String): Long {
+    return this.getNamedItem(name).nodeValue.toLong()
+}
+
+fun NamedNodeMap.getString(name: String): String {
     return this.getNamedItem(name).nodeValue
 }
 
-fun NamedNodeMap.getNullableValue(name: String): String? {
+fun NamedNodeMap.getNullableString(name: String): String? {
     return this.getNamedItem(name)?.nodeValue
+}
+
+fun NamedNodeMap.getAsModalVerbOption(name: String, defaultValue: ModalVerbOption): ModalVerbOption {
+    val stringValue = this.getNullableString(name) ?: return defaultValue
+    return when (stringValue.toLowerCase()) {
+        "may" -> ModalVerbOption.MAY
+        "must" -> ModalVerbOption.MUST
+        "mustnot" -> ModalVerbOption.MUST_NOT
+        else -> throw IllegalArgumentException("${stringValue} does not match any option")
+    }
+}
+
+fun NamedNodeMap.getAsBinaryOption(name: String, defaultValue: Boolean): Boolean {
+    val stringValue = this.getNullableString(name) ?: return defaultValue
+    return when (stringValue.toLowerCase()) {
+        "yes" -> true
+        "no" -> false
+        else -> throw IllegalArgumentException("${stringValue} does not match any option")
+    }
 }
 
 fun NodeList.isEmpty(): Boolean {

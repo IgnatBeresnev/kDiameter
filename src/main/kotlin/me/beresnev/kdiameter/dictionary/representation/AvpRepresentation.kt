@@ -1,14 +1,17 @@
 package me.beresnev.kdiameter.dictionary.representation
 
+import me.beresnev.kdiameter.dictionary.representation.attributes.ModalVerbOption
+
 data class AvpRepresentation(
     val code: Long,
     val name: String,
-    val vendor: VendorRepresentation?,
 
-    val mandatory: String? = null,
-    val protected: String? = null,
-    val mayEncrypt: String? = null,
-    val vendorBit: String? = null,
+    val vendor: VendorRepresentation,
+
+    val mayEncrypt: Boolean = true, // "YES" or "NO"
+    val mandatory: ModalVerbOption = ModalVerbOption.MAY,
+    val protected: ModalVerbOption = ModalVerbOption.MAY,
+    val vendorBit: ModalVerbOption = ModalVerbOption.MAY,
 
     val type: TypeRepresentation? = null,
 

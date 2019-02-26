@@ -7,6 +7,34 @@ import spock.lang.Unroll
 
 class XmlDictionarySpec extends Specification {
 
+    def "should parse full dictionary without exceptions and with correct count"() {
+        given:
+        def typeDefXml = new File(getDictionaryTestFile("complete_dictionary"))
+        def dictionary = new XmlDictionary()
+
+        when:
+        dictionary.parse(typeDefXml)
+
+        then:
+        dictionary.types.size() == 18
+        dictionary.applications.size() == 100
+
+        dictionary.commands.size() == 67
+        dictionary.vendors.size() == 12
+
+        // there are two AVPs with code 300 but with different
+        // name and vendor-id, so it is put under one AVP code
+        dictionary.avpsByCode.size() == 1279
+        dictionary.avpsByCode.values().size() == 1279
+        dictionary.avpsByCode[300L].size() == 2
+
+        // there are two AVPs with name "Bandwidth" but with
+        // different codes and vendor id, so it's put under one name
+        dictionary.avpsByName.size() == 1279
+        dictionary.avpsByName.values().size() == 1279
+        dictionary.avpsByName["Bandwidth"].size() == 2
+    }
+
     @Unroll
     def "should correctly parse all type definitions with and without parent"() {
         given:
@@ -102,13 +130,13 @@ class XmlDictionarySpec extends Specification {
         def command = commands[code]
         command.code == code
         command.name == name
-        command.vendor == vendor
+        command.vendor.vendorId == vendorId
 
         where:
-        code | name                    | vendor
-        257L | "Capabilities-Exchange" | null
-        258L | "Re-Auth"               | null
-        275L | "Session-Termination"   | null
+        code | name                    | vendorId
+        257L | "Capabilities-Exchange" | "None"
+        258L | "Re-Auth"               | "None"
+        275L | "Session-Termination"   | "None"
     }
 
     @Unroll
@@ -120,9 +148,9 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def avps = dictionary.avps
+        def avps = dictionary.avpsByCode
         def avpsWithExpectedCode = avps.get(expectedAvpCode)
-        def expectedAvp = avpsWithExpectedCode?.get(0)
+        def expectedAvp = avpsWithExpectedCode[0L]
 
         then:
         avps.size() == 1
@@ -162,9 +190,9 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def avps = dictionary.avps
+        def avps = dictionary.avpsByCode
         def avpsWithExpectedCode = avps.get(expectedAvpCode)
-        def expectedAvp = avpsWithExpectedCode?.get(0)
+        def expectedAvp = avpsWithExpectedCode[0L]
 
         then:
         avps.size() == 1
