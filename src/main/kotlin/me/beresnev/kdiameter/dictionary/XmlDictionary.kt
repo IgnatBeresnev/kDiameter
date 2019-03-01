@@ -5,7 +5,7 @@ import me.beresnev.kdiameter.dictionary.representation.AvpRepresentation
 import me.beresnev.kdiameter.dictionary.representation.CommandRepresentation
 import me.beresnev.kdiameter.dictionary.representation.TypeRepresentation
 import me.beresnev.kdiameter.dictionary.representation.VendorRepresentation
-import me.beresnev.kdiameter.dictionary.representation.attributes.ModalVerbOption
+import me.beresnev.kdiameter.dictionary.representation.attributes.ModalAttribute
 import me.beresnev.kdiameter.extensions.equalsIgnoreCase
 import me.beresnev.kdiameter.extensions.getAsBinaryOption
 import me.beresnev.kdiameter.extensions.getAsModalVerbOption
@@ -23,6 +23,16 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 @NotThreadSafe
 open class XmlDictionary {
+
+    companion object DefaultValues {
+        const val DEF_VENDOR_ID = "None"
+        const val DEF_VENDOR_CODE = 0L
+
+        const val DEF_MAY_ENCRYPT = true
+        val DEF_MANDATORY = ModalAttribute.MAY
+        val DEF_PROTECTED = ModalAttribute.MAY
+        val DEF_VENDOR_BIT = ModalAttribute.MAY
+    }
 
     protected val types: MutableMap<String, TypeRepresentation> = HashMap()
     protected val applications: MutableMap<Long, ApplicationRepresentation> = HashMap() // key is id
@@ -78,7 +88,9 @@ open class XmlDictionary {
 
     // <vendor vendor-id="Lucent" code="1751" name="Lucent Technologies"/>
     private fun parseVendors(doc: Document) {
-        vendors["None"] = VendorRepresentation("None", 0L, "None")
+        // adding a default vendor to use it for all AVPs where vendor-id is not set
+        vendors[DEF_VENDOR_ID] = VendorRepresentation(DEF_VENDOR_ID, DEF_VENDOR_CODE, DEF_VENDOR_ID)
+
         executeOnAllNamedElementsAttributes(doc, "vendor") {
             val vendorId = it.getString("vendor-id")
             vendors[vendorId] = VendorRepresentation(
@@ -130,10 +142,10 @@ open class XmlDictionary {
                 code = avpAttributes.getLong("code"),
                 name = avpAttributes.getString("name"),
                 vendor = extractAvpVendor(avpAttributes),
-                mayEncrypt = avpAttributes.getAsBinaryOption("may-encrypt", defaultValue = true),
-                mandatory = avpAttributes.getAsModalVerbOption("mandatory", defaultValue = ModalVerbOption.MAY),
-                protected = avpAttributes.getAsModalVerbOption("protected", defaultValue = ModalVerbOption.MAY),
-                vendorBit = avpAttributes.getAsModalVerbOption("vendor-bit", defaultValue = ModalVerbOption.MAY),
+                mayEncrypt = avpAttributes.getAsBinaryOption("may-encrypt", defaultValue = DEF_MAY_ENCRYPT),
+                mandatory = avpAttributes.getAsModalVerbOption("mandatory", defaultValue = DEF_MANDATORY),
+                protected = avpAttributes.getAsModalVerbOption("protected", defaultValue = DEF_PROTECTED),
+                vendorBit = avpAttributes.getAsModalVerbOption("vendor-bit", defaultValue = DEF_VENDOR_BIT),
                 type = extractAvpType(castedAvpElement),
                 enumValues = extractEnumValues(castedAvpElement),
                 groupedAvps = extractGroupedValues(castedAvpElement)
@@ -146,11 +158,11 @@ open class XmlDictionary {
     }
 
     /**
-     * @return vendor with vendor-id == "None" if no vendor-id set
+     * @return default vendor if vendor-id is not set
      */
     private fun extractAvpVendor(attributes: NamedNodeMap): VendorRepresentation {
         val vendorId = attributes.getNullableString("vendor-id")
-        return (if (vendorId == null) vendors["None"] else vendors[vendorId]) ?: throw IllegalStateException()
+        return (if (vendorId == null) vendors[DEF_VENDOR_ID] else vendors[vendorId]) ?: throw IllegalStateException()
     }
 
     private fun extractAvpType(avpElement: Element): TypeRepresentation? {

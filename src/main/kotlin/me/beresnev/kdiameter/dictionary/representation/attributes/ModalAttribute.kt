@@ -1,6 +1,6 @@
 package me.beresnev.kdiameter.dictionary.representation.attributes
 
-enum class ModalVerbOption {
+enum class ModalAttribute {
     MUST,
     MAY,
     MUST_NOT

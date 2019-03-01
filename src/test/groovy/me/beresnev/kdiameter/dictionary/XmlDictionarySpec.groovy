@@ -1,11 +1,17 @@
 package me.beresnev.kdiameter.dictionary
 
 
+import me.beresnev.kdiameter.dictionary.representation.attributes.ModalAttribute
 import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class XmlDictionarySpec extends Specification {
+
+    private static final def DEF_MAY_ENCRYPT = XmlDictionary.DEF_MAY_ENCRYPT
+    private static final def DEF_MANDATORY = XmlDictionary.DEF_MANDATORY
+    private static final def DEF_PROTECTED = XmlDictionary.DEF_PROTECTED
+    private static final def DEF_VENDOR_BIT = XmlDictionary.DEF_VENDOR_BIT
 
     def "should parse full dictionary without exceptions and with correct count"() {
         given:
@@ -140,6 +146,118 @@ class XmlDictionarySpec extends Specification {
     }
 
     @Unroll
+    def "should parse simple avps and assert avpsByCode equals avpsByName"() {
+        given:
+        def typeDefXml = new File(getDictionaryTestFile("avp_simple"))
+        def dictionary = new XmlDictionary()
+
+        when:
+        dictionary.parse(typeDefXml)
+        def avpsByCode = dictionary.avpsByCode
+        def avpsByName = dictionary.avpsByName
+
+        then:
+        (avpsByCode.size() == avpsByName.size()) && avpsByCode.size() == 6
+
+        expect:
+        avpsByCode.get(code).get(vendorId) == avpsByName.get(name).get(vendorId)
+
+        where:
+        code | name             | vendorId
+        1L   | "User-Name"      | 0L
+        2L   | "User-Password"  | 0L
+        3L   | "CHAP-Password"  | 0L
+        4L   | "NAS-IP-Address" | 0L
+        5L   | "NAS-Port"       | 0L
+        404L | "Key-ExpiryTime" | 10415L
+    }
+
+    @Unroll
+    def "should parse simple avps (not grouped/enum) and assert all enum attributes"() {
+        given:
+        def typeDefXml = new File(getDictionaryTestFile("avp_simple"))
+        def dictionary = new XmlDictionary()
+
+        when:
+        dictionary.parse(typeDefXml)
+        def avpsByCode = dictionary.avpsByCode
+
+        then:
+        avpsByCode.size() == 6
+
+        expect:
+        def currentAvp = avpsByCode[code][vendorCode]
+
+        currentAvp.mayEncrypt == mayEncrypt
+        currentAvp.mandatory == mandatory
+        currentAvp.protected == protectedValue
+        currentAvp.vendorBit == vendorBit
+
+        where:
+        code | vendorCode | mayEncrypt      | mandatory           | protectedValue      | vendorBit
+        1L   | 0L         | DEF_MAY_ENCRYPT | DEF_MANDATORY       | DEF_PROTECTED       | DEF_VENDOR_BIT
+        2L   | 0L         | DEF_MAY_ENCRYPT | ModalAttribute.MUST | DEF_PROTECTED       | DEF_VENDOR_BIT
+        3L   | 0L         | true            | ModalAttribute.MUST | DEF_PROTECTED       | DEF_VENDOR_BIT
+        4L   | 0L         | true            | ModalAttribute.MUST | ModalAttribute.MUST | DEF_VENDOR_BIT
+        5L   | 0L         | true            | ModalAttribute.MUST | ModalAttribute.MUST | ModalAttribute.MUST_NOT
+    }
+
+    @Unroll
+    def "should parse simple avps (not grouped/enum) and assert vendor"() {
+        given:
+        def typeDefXml = new File(getDictionaryTestFile("avp_simple"))
+        def dictionary = new XmlDictionary()
+
+        when:
+        dictionary.parse(typeDefXml)
+        def avpsByCode = dictionary.avpsByCode
+
+        then:
+        avpsByCode.size() == 6
+
+        expect:
+        def currentAvp = avpsByCode[code][vendorCode]
+        currentAvp.vendor.vendorId == vendorId
+        currentAvp.vendor.code == vendorCode
+        currentAvp.vendor.name == vendorName
+
+        where:
+        code | vendorId | vendorCode | vendorName
+        4L   | "None"   | 0L         | "None"
+        404L | "TGPP"   | 10415L     | "3GPP"
+    }
+
+    @Unroll
+    def "should parse simple avps (not grouped/enum) and assert type"() {
+        given:
+        def typeDefXml = new File(getDictionaryTestFile("avp_simple"))
+        def dictionary = new XmlDictionary()
+
+        when:
+        dictionary.parse(typeDefXml)
+        def avpsByCode = dictionary.avpsByCode
+
+        then:
+        avpsByCode.size() == 6
+
+        expect:
+        def currentAvp = avpsByCode[code][vendorCode]
+
+        !currentAvp.type.isEnum()
+        currentAvp.type.typeName == typeName
+        currentAvp.type.typeParent?.typeName == typeParent
+
+        where:
+        code | vendorCode | typeName      | typeParent
+        1L   | 0L         | "UTF8String"  | "OctetString"
+        2L   | 0L         | "UTF8String"  | "OctetString"
+        3L   | 0L         | "OctetString" | null
+        4L   | 0L         | "OctetString" | null
+        5L   | 0L         | "Unsigned32"  | null
+        404L | 10415L     | "Time"        | null
+    }
+
+    @Unroll
     def "should parse enumerated avp with multiple values"() {
         given:
         def typeDefXml = new File(getDictionaryTestFile("avp_enum"))
@@ -149,7 +267,7 @@ class XmlDictionarySpec extends Specification {
         when:
         dictionary.parse(typeDefXml)
         def avps = dictionary.avpsByCode
-        def avpsWithExpectedCode = avps.get(expectedAvpCode)
+        def avpsWithExpectedCode = avps[expectedAvpCode]
         def expectedAvp = avpsWithExpectedCode[0L]
 
         then:
@@ -166,7 +284,7 @@ class XmlDictionarySpec extends Specification {
         expectedAvp.enumValues.size() == 7
 
         expect:
-        def enumValue = expectedAvp.enumValues.get(index)
+        def enumValue = expectedAvp.enumValues[index]
         enumValue.name == name
         enumValue.code == code
 
@@ -191,7 +309,7 @@ class XmlDictionarySpec extends Specification {
         when:
         dictionary.parse(typeDefXml)
         def avps = dictionary.avpsByCode
-        def avpsWithExpectedCode = avps.get(expectedAvpCode)
+        def avpsWithExpectedCode = avps[expectedAvpCode]
         def expectedAvp = avpsWithExpectedCode[0L]
 
         then:
@@ -208,7 +326,7 @@ class XmlDictionarySpec extends Specification {
         expectedAvp.groupedAvps.size() == 2
 
         expect:
-        expectedAvp.groupedAvps.get(index).name == name
+        expectedAvp.groupedAvps[index].name == name
 
         where:
         index | name

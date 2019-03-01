@@ -1,6 +1,6 @@
 package me.beresnev.kdiameter.extensions
 
-import me.beresnev.kdiameter.dictionary.representation.attributes.ModalVerbOption
+import me.beresnev.kdiameter.dictionary.representation.attributes.ModalAttribute
 import net.jcip.annotations.NotThreadSafe
 import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
@@ -18,12 +18,12 @@ fun NamedNodeMap.getNullableString(name: String): String? {
     return this.getNamedItem(name)?.nodeValue
 }
 
-fun NamedNodeMap.getAsModalVerbOption(name: String, defaultValue: ModalVerbOption): ModalVerbOption {
+fun NamedNodeMap.getAsModalVerbOption(name: String, defaultValue: ModalAttribute): ModalAttribute {
     val stringValue = this.getNullableString(name) ?: return defaultValue
     return when (stringValue.toLowerCase()) {
-        "may" -> ModalVerbOption.MAY
-        "must" -> ModalVerbOption.MUST
-        "mustnot" -> ModalVerbOption.MUST_NOT
+        "may" -> ModalAttribute.MAY
+        "must" -> ModalAttribute.MUST
+        "mustnot" -> ModalAttribute.MUST_NOT
         else -> throw IllegalArgumentException("${stringValue} does not match any option")
     }
 }
