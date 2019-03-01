@@ -1,3 +1,9 @@
+0.0.4
+-----
+* Closes [Issue #1](https://github.com/IgnatBeresnev/kDiameter/issues/1)
+* Dictionary interface, XmlDictionary as the only implementation ATM
+* More tests for simple AVPs (vendor, type, attributes, etc)
+
 0.0.3
 -----
 * XmlDictionary-related refactoring

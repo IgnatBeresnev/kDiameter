@@ -22,7 +22,7 @@ import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
 @NotThreadSafe
-open class XmlDictionary {
+open class XmlDictionary : Dictionary {
 
     companion object DefaultValues {
         const val DEF_VENDOR_ID = "None"
@@ -228,5 +228,29 @@ open class XmlDictionary {
         elementsByTagName.iterator().forEachRemaining {
             attributesExecutable.invoke(it.attributes)
         }
+    }
+
+    override fun getType(name: String): TypeRepresentation? {
+        return types[name]
+    }
+
+    override fun getApplication(id: Long): ApplicationRepresentation? {
+        return applications[id]
+    }
+
+    override fun getVendor(vendorId: String): VendorRepresentation? {
+        return vendors[vendorId]
+    }
+
+    override fun getCommand(code: Long): CommandRepresentation? {
+        return commands[code]
+    }
+
+    override fun getAvp(code: Long, vendorId: Long): AvpRepresentation? {
+        return avpsByCode[code]?.get(vendorId)
+    }
+
+    override fun getAvp(name: String, vendorId: Long): AvpRepresentation? {
+        return avpsByName[name]?.get(vendorId)
     }
 }
