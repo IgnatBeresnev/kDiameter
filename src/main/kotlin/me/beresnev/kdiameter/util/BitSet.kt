@@ -6,13 +6,9 @@ import net.jcip.annotations.NotThreadSafe
  * Allows a maximum of 32 bits to be stored
  */
 @NotThreadSafe // as well as subject to word tearing
-data class BitSet(
-    var bitHolder: Int = 0
+class BitSet(
+    private var bitHolder: Int = 0
 ) {
-
-    fun getAsByte(): Byte {
-        return bitHolder.toByte()
-    }
 
     fun getAsInt(): Int {
         return bitHolder

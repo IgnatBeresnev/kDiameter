@@ -194,12 +194,12 @@ class XmlDictionarySpec extends Specification {
         currentAvp.vendorBit == vendorBit
 
         where:
-        code | vendorCode | mayEncrypt      | mandatory           | protectedValue      | vendorBit
-        1L   | 0L         | DEF_MAY_ENCRYPT | DEF_MANDATORY       | DEF_PROTECTED       | DEF_VENDOR_BIT
-        2L   | 0L         | DEF_MAY_ENCRYPT | ModalAttribute.MUST | DEF_PROTECTED       | DEF_VENDOR_BIT
-        3L   | 0L         | true            | ModalAttribute.MUST | DEF_PROTECTED       | DEF_VENDOR_BIT
-        4L   | 0L         | true            | ModalAttribute.MUST | ModalAttribute.MUST | DEF_VENDOR_BIT
-        5L   | 0L         | true            | ModalAttribute.MUST | ModalAttribute.MUST | ModalAttribute.MUST_NOT
+        code | vendorCode | mandatory           | mayEncrypt      | protectedValue      | vendorBit
+        1L   | 0L         | DEF_MANDATORY       | DEF_MAY_ENCRYPT | DEF_PROTECTED       | DEF_VENDOR_BIT
+        2L   | 0L         | ModalAttribute.MUST | DEF_MAY_ENCRYPT | DEF_PROTECTED       | DEF_VENDOR_BIT
+        3L   | 0L         | ModalAttribute.MUST | true            | DEF_PROTECTED       | DEF_VENDOR_BIT
+        4L   | 0L         | ModalAttribute.MUST | true            | ModalAttribute.MUST | DEF_VENDOR_BIT
+        5L   | 0L         | ModalAttribute.MUST | true            | ModalAttribute.MUST | ModalAttribute.MUST_NOT
     }
 
     @Unroll

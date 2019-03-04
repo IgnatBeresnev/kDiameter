@@ -23,6 +23,7 @@ class BitSetTest extends Specification {
         15        | true      | true     | true      | true // 1111
     }
 
+    @Unroll
     def "should correctly encode bits to an int"() {
         expect:
         def bitSet = new BitSet()
