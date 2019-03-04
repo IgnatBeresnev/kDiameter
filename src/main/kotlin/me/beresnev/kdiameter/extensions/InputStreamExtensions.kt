@@ -3,8 +3,6 @@ package me.beresnev.kdiameter.extensions
 import java.io.InputStream
 
 /**
- * "valid" in this sense means that it will never return -1
- *
  * @throws IllegalStateException if end of stream reached (read value is -1)
  */
 fun InputStream.readByte(): Int {
@@ -14,6 +12,9 @@ fun InputStream.readByte(): Int {
     return readValue
 }
 
+/**
+ * @throws IllegalStateException if end of stream reached (read value is -1)
+ */
 // unsigned value is guaranteed to be within signed int bounds
 fun InputStream.readThreeBytes(): Int {
     val b1 = this.read()
@@ -24,6 +25,9 @@ fun InputStream.readThreeBytes(): Int {
     return (b1 shl 16) + (b2 shl 8) + (b3 shl 0)
 }
 
+/**
+ * @throws IllegalStateException if end of stream reached (read value is -1)
+ */
 // might overflow
 fun InputStream.readFourBytes(): Int {
     val ch1 = this.read()

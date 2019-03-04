@@ -49,12 +49,12 @@ import me.beresnev.kdiameter.util.BitSet
  * These flag bits are reserved for future use; they MUST be set
  * to zero and ignored by the receiver.
  */
-class CommandFlags {
-    val isRequest: Boolean
-    val isProxiable: Boolean
-    val isError: Boolean
+data class CommandFlags(
+    val isRequest: Boolean,
+    val isProxiable: Boolean,
+    val isError: Boolean,
     val isPotentiallyRetransmitted: Boolean
-
+) {
     internal constructor(commandFlags: Int) : this(BitSet(commandFlags))
 
     internal constructor(flags: BitSet) : this(
@@ -63,14 +63,4 @@ class CommandFlags {
         isError = flags.get(5),
         isPotentiallyRetransmitted = flags.get(4)
     )
-
-    constructor(
-        isRequest: Boolean, isProxiable: Boolean,
-        isError: Boolean, isPotentiallyRetransmitted: Boolean
-    ) {
-        this.isRequest = isRequest
-        this.isProxiable = isProxiable
-        this.isError = isError
-        this.isPotentiallyRetransmitted = isPotentiallyRetransmitted
-    }
 }

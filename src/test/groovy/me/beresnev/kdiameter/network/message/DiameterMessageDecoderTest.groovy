@@ -91,11 +91,11 @@ class DiameterMessageDecoderTest extends Specification {
         def messageDecoder = new DiameterMessageDecoder()
         def dumpCopy = REAL_CER_DUMP.clone()
 
-        // real value in dump is 0x88 (136), we'll change it to 0x99 (153)
-        byte newDiameterMessageLength = (byte) 0x99
+        // real value in dump is 0x88 (136)
+        int newDiameterMessageLength = 0x99
 
         when:
-        dumpCopy[3] = newDiameterMessageLength // change version, it's always the first byte
+        dumpCopy[3] = newDiameterMessageLength
         def diameterMessage = messageDecoder.decode(dumpCopy)
 
         then:
