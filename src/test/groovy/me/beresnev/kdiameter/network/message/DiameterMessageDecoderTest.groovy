@@ -1,9 +1,12 @@
 package me.beresnev.kdiameter.network.message
 
+
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class DiameterMessageDecoderTest extends Specification {
 
+    // Wireshark textual dump
     // Diameter Protocol
     // Version: 0x01
     // Length: 136
@@ -50,36 +53,88 @@ class DiameterMessageDecoderTest extends Specification {
     ]
 
     def "should decode CER, without checking AVPs"() {
-        given:
-        def messageDecoder = new DiameterMessageDecoder()
-
         when:
-        def diameterMessage = messageDecoder.decode(REAL_CER_DUMP)
+        def diameterMessage = DiameterMessageDecoder.INSTANCE.decode(REAL_CER_DUMP)
         def commandFlags = diameterMessage.commandFlags
 
         then:
         commandFlags.isRequest
-
         !commandFlags.isProxiable
         !commandFlags.isError
         !commandFlags.isPotentiallyRetransmitted
 
         diameterMessage.commandCode == 257
-
         diameterMessage.applicationId == 0
 
-        diameterMessage.hopByHop == 1176020940 // 0x4618a7cc in dump
-        diameterMessage.endToEnd == 216006656 // 0x0ce00000 in dump
+        diameterMessage.hopByHop == 0x4618a7cc
+        diameterMessage.endToEnd == 0x0ce00000
+    }
+
+    @Unroll
+    def "should decode CER AVPs and assert avp values"() {
+        when:
+        def diameterMessage = DiameterMessageDecoder.INSTANCE.decode(REAL_CER_DUMP)
+
+        then:
+        diameterMessage.avps.size() == 8
+
+        expect:
+        def avp = diameterMessage.avpsMap.get(code)
+
+        if (expectedValue instanceof String) {
+            avp.avpData.asUTF8String() == expectedValue
+        } else if (expectedValue instanceof Integer) {
+            avp.avpData.asInt() == expectedValue
+        } else {
+            throw new IllegalStateException("Unknown value type")
+        }
+
+        where:
+        code | expectedValue
+        264L | "127.0.0.1"
+        296L | "pcrf"
+        257L | "127.0.0.1"
+        266L | 0
+        269L | "PCRF-Tester"
+        258L | 16777238
+        267L | 1
+        278L | 1176020954
+    }
+
+    def "should decode CER AVPs and assert flags"() {
+        when:
+        def diameterMessage = DiameterMessageDecoder.INSTANCE.decode(REAL_CER_DUMP)
+
+        then:
+        diameterMessage.avps.size() == 8
+
+        expect:
+        def avpsMap = diameterMessage.avpsMap
+        def avp = avpsMap.get(code)
+
+        avp.avpFlags.vendorSpecific == isVendorSpecific
+        avp.avpFlags.mandatory == isMandatory
+        avp.avpFlags.protected == isProtected
+
+        where:
+        code | isVendorSpecific | isMandatory | isProtected
+        264L | false            | true        | false
+        296L | false            | true        | false
+        257L | false            | true        | false
+        266L | false            | true        | false
+        269L | false            | false       | false
+        258L | false            | true        | false
+        267L | false            | false       | false
+        278L | false            | true        | false
     }
 
     def "should throw IllegalArgumentException for unsupported diameter message version"() {
         given:
-        def messageDecoder = new DiameterMessageDecoder()
         def dumpCopy = REAL_CER_DUMP.clone()
 
         when:
         dumpCopy[0] = 0x05 // change version, it's always the first byte
-        def diameterMessage = messageDecoder.decode(dumpCopy)
+        def diameterMessage = DiameterMessageDecoder.INSTANCE.decode(dumpCopy)
 
         then:
         IllegalArgumentException e = thrown()
@@ -88,7 +143,6 @@ class DiameterMessageDecoderTest extends Specification {
 
     def "should throw IllegalArgumentException when received LESS bytes than diameter message carries"() {
         given:
-        def messageDecoder = new DiameterMessageDecoder()
         def dumpCopy = REAL_CER_DUMP.clone()
 
         // real value in dump is 0x88 (136)
@@ -96,7 +150,7 @@ class DiameterMessageDecoderTest extends Specification {
 
         when:
         dumpCopy[3] = newDiameterMessageLength
-        def diameterMessage = messageDecoder.decode(dumpCopy)
+        def diameterMessage = DiameterMessageDecoder.INSTANCE.decode(dumpCopy)
 
         then:
         IllegalArgumentException e = thrown()
@@ -107,13 +161,11 @@ class DiameterMessageDecoderTest extends Specification {
 
     def "should throw IllegalArgumentException when received MORE bytes than diameter message carries"() {
         given:
-        def messageDecoder = new DiameterMessageDecoder()
-
         int garbageBytes = 10
         def dumpCopy = Arrays.copyOf(REAL_CER_DUMP, REAL_CER_DUMP.size() + garbageBytes) // add some garbage
 
         when:
-        def diameterMessage = messageDecoder.decode(dumpCopy)
+        def diameterMessage = DiameterMessageDecoder.INSTANCE.decode(dumpCopy)
 
         then:
         IllegalArgumentException e = thrown()

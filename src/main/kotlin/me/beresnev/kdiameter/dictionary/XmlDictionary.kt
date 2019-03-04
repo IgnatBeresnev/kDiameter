@@ -40,8 +40,8 @@ open class XmlDictionary : Dictionary {
     protected val vendors: MutableMap<String, VendorRepresentation> = HashMap() // key is vendor-id (string)
     protected val commands: MutableMap<Long, CommandRepresentation> = HashMap() // key is code
 
-    protected val avpsByCode: MutableMap<Long, MutableMap<Long, AvpRepresentation>> = HashMap()
-    protected val avpsByName: MutableMap<String, MutableMap<Long, AvpRepresentation>> = HashMap()
+    protected val avpsByCodeAndVendorId: MutableMap<Long, MutableMap<Long, AvpRepresentation>> = HashMap()
+    protected val avpsByNameAndVendorId: MutableMap<String, MutableMap<Long, AvpRepresentation>> = HashMap()
 
     fun parse(xmlFile: File) {
         val dbFactory = DocumentBuilderFactory.newInstance()
@@ -152,8 +152,8 @@ open class XmlDictionary : Dictionary {
             )
 
             val vendorCode = avpRepresentation.vendor.code
-            avpsByCode.getOrPut(avpRepresentation.code) { HashMap() }[vendorCode] = avpRepresentation
-            avpsByName.getOrPut(avpRepresentation.name) { HashMap() }[vendorCode] = avpRepresentation
+            avpsByCodeAndVendorId.getOrPut(avpRepresentation.code) { HashMap() }[vendorCode] = avpRepresentation
+            avpsByNameAndVendorId.getOrPut(avpRepresentation.name) { HashMap() }[vendorCode] = avpRepresentation
         }
     }
 
@@ -247,10 +247,10 @@ open class XmlDictionary : Dictionary {
     }
 
     override fun getAvp(code: Long, vendorId: Long): AvpRepresentation? {
-        return avpsByCode[code]?.get(vendorId)
+        return avpsByCodeAndVendorId[code]?.get(vendorId)
     }
 
     override fun getAvp(name: String, vendorId: Long): AvpRepresentation? {
-        return avpsByName[name]?.get(vendorId)
+        return avpsByNameAndVendorId[name]?.get(vendorId)
     }
 }

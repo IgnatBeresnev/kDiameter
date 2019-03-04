@@ -1,6 +1,8 @@
 package me.beresnev.kdiameter.network.message
 
 import me.beresnev.kdiameter.model.Avp
+import me.beresnev.kdiameter.model.AvpsMap
+import me.beresnev.kdiameter.network.message.flags.CommandFlags
 
 /**
  * >> Command Code
@@ -65,4 +67,8 @@ data class DiameterMessage(
     val endToEnd: Long,
 
     val avps: List<Avp>
-)
+) {
+    val avpsMap: AvpsMap by lazy {
+        AvpsMap(avps)
+    }
+}

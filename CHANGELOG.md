@@ -1,3 +1,9 @@
+0.0.5
+-----
+* Diameter message decoder. Convert received bytes to human-usable message
+* Basic tests based on a real CER dump
+* BitSet utility class, for easier manipulation with bit flags
+
 0.0.4
 -----
 * Closes [Issue #1](https://github.com/IgnatBeresnev/kDiameter/issues/1)

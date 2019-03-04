@@ -30,15 +30,17 @@ class XmlDictionarySpec extends Specification {
 
         // there are two AVPs with code 300 but with different
         // name and vendor-id, so it is put under one AVP code
-        dictionary.avpsByCode.size() == 1279
-        dictionary.avpsByCode.values().size() == 1279
-        dictionary.avpsByCode[300L].size() == 2
+        def avpsByCode = dictionary.getAvpsByCodeAndVendorId()
+        avpsByCode.size() == 1279
+        avpsByCode.values().size() == 1279
+        avpsByCode[300L].size() == 2
 
         // there are two AVPs with name "Bandwidth" but with
         // different codes and vendor id, so it's put under one name
-        dictionary.avpsByName.size() == 1279
-        dictionary.avpsByName.values().size() == 1279
-        dictionary.avpsByName["Bandwidth"].size() == 2
+        def avpsByName = dictionary.getAvpsByNameAndVendorId()
+        avpsByName.size() == 1279
+        avpsByName.values().size() == 1279
+        avpsByName["Bandwidth"].size() == 2
     }
 
     @Unroll
@@ -49,13 +51,12 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def types = dictionary.types
 
         then:
-        types.size() == 4
+        dictionary.types.size() == 4
 
         expect:
-        types.get(typeName).typeParent == types[typeParentName]
+        dictionary.getType(typeName).typeParent == dictionary.types[typeParentName] // nullable parent
 
         where:
         typeName           | typeParentName
@@ -73,13 +74,12 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def applications = dictionary.applications
 
         then:
-        applications.size() == 4
+        dictionary.applications.size() == 4
 
         expect:
-        def application = applications[appId]
+        def application = dictionary.getApplication(appId)
         application.id == appId
         application.name == appName
         application.uri == appUri
@@ -100,13 +100,12 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def vendors = dictionary.vendors
 
         then:
-        vendors.size() == 4
+        dictionary.vendors.size() == 4
 
         expect:
-        def vendor = vendors[vendorId]
+        def vendor = dictionary.getVendor(vendorId)
         vendor.vendorId == vendorId
         vendor.code == code
         vendor.name == name
@@ -127,13 +126,12 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def commands = dictionary.commands
 
         then:
-        commands.size() == 3
+        dictionary.commands.size() == 3
 
         expect:
-        def command = commands[code]
+        def command = dictionary.getCommand(code)
         command.code == code
         command.name == name
         command.vendor.vendorId == vendorId
@@ -153,14 +151,14 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def avpsByCode = dictionary.avpsByCode
-        def avpsByName = dictionary.avpsByName
 
         then:
-        (avpsByCode.size() == avpsByName.size()) && avpsByCode.size() == 6
+        def avpsByCodeSize = dictionary.getAvpsByCodeAndVendorId().size()
+        def avpsByNameSize = dictionary.getAvpsByNameAndVendorId().size()
+        (avpsByCodeSize == avpsByNameSize) && avpsByNameSize == 6
 
         expect:
-        avpsByCode.get(code).get(vendorId) == avpsByName.get(name).get(vendorId)
+        dictionary.getAvp(code, vendorId) == dictionary.getAvp(name, vendorId)
 
         where:
         code | name             | vendorId
@@ -180,13 +178,12 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def avpsByCode = dictionary.avpsByCode
 
         then:
-        avpsByCode.size() == 6
+        dictionary.getAvpsByCodeAndVendorId().size() == 6
 
         expect:
-        def currentAvp = avpsByCode[code][vendorCode]
+        def currentAvp = dictionary.getAvp(code, vendorCode)
 
         currentAvp.mayEncrypt == mayEncrypt
         currentAvp.mandatory == mandatory
@@ -210,13 +207,12 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def avpsByCode = dictionary.avpsByCode
 
         then:
-        avpsByCode.size() == 6
+        dictionary.getAvpsByCodeAndVendorId().size() == 6
 
         expect:
-        def currentAvp = avpsByCode[code][vendorCode]
+        def currentAvp = dictionary.getAvp(code, vendorCode)
         currentAvp.vendor.vendorId == vendorId
         currentAvp.vendor.code == vendorCode
         currentAvp.vendor.name == vendorName
@@ -235,13 +231,12 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def avpsByCode = dictionary.avpsByCode
 
         then:
-        avpsByCode.size() == 6
+        dictionary.getAvpsByCodeAndVendorId().size() == 6
 
         expect:
-        def currentAvp = avpsByCode[code][vendorCode]
+        def currentAvp = dictionary.getAvp(code, vendorCode)
 
         !currentAvp.type.isEnum()
         currentAvp.type.typeName == typeName
@@ -266,15 +261,9 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def avps = dictionary.avpsByCode
-        def avpsWithExpectedCode = avps[expectedAvpCode]
-        def expectedAvp = avpsWithExpectedCode[0L]
+        def expectedAvp = dictionary.getAvp(expectedAvpCode)
 
         then:
-        avps.size() == 1
-        avpsWithExpectedCode != null
-        avpsWithExpectedCode.size() == 1
-
         expectedAvp != null
         expectedAvp.name == "Day-Of-Week"
         expectedAvp.code == expectedAvpCode
@@ -308,15 +297,9 @@ class XmlDictionarySpec extends Specification {
 
         when:
         dictionary.parse(typeDefXml)
-        def avps = dictionary.avpsByCode
-        def avpsWithExpectedCode = avps[expectedAvpCode]
-        def expectedAvp = avpsWithExpectedCode[0L]
+        def expectedAvp = dictionary.getAvp(expectedAvpCode)
 
         then:
-        avps.size() == 1
-        avpsWithExpectedCode != null
-        avpsWithExpectedCode.size() == 1
-
         expectedAvp != null
         expectedAvp.name == "EUI64-Address-Mask"
         expectedAvp.code == expectedAvpCode
