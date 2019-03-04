@@ -1,4 +1,4 @@
-package me.beresnev.kdiameter.model
+package me.beresnev.kdiameter.network.message.avp
 
 import me.beresnev.kdiameter.converter.ToByteConverter
 import me.beresnev.kdiameter.network.message.flags.AvpFlags
@@ -46,15 +46,30 @@ class Avp private constructor(
 ) {
     companion object {
         fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: Int): Avp {
-            return create(code, avpFlags, vendorId, ToByteConverter.toByteArray(value))
+            return create(
+                code,
+                avpFlags,
+                vendorId,
+                ToByteConverter.toByteArray(value)
+            )
         }
 
         fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: String): Avp {
-            return create(code, avpFlags, vendorId, value.toByteArray())
+            return create(
+                code,
+                avpFlags,
+                vendorId,
+                value.toByteArray()
+            )
         }
 
         fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: ByteArray): Avp {
-            return Avp(code, avpFlags, vendorId, AvpData(value))
+            return Avp(
+                code,
+                avpFlags,
+                vendorId,
+                AvpData(value)
+            )
         }
     }
 }

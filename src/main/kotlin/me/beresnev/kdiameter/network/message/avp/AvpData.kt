@@ -1,6 +1,6 @@
 @file:Suppress("ArrayInDataClass")
 
-package me.beresnev.kdiameter.model
+package me.beresnev.kdiameter.network.message.avp
 
 import me.beresnev.kdiameter.converter.FromByteConverter
 import me.beresnev.kdiameter.network.message.DiameterMessageDecoder

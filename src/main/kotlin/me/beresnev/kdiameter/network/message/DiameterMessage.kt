@@ -1,7 +1,7 @@
 package me.beresnev.kdiameter.network.message
 
-import me.beresnev.kdiameter.model.Avp
-import me.beresnev.kdiameter.model.AvpsMap
+import me.beresnev.kdiameter.network.message.avp.Avp
+import me.beresnev.kdiameter.network.message.avp.AvpsMap
 import me.beresnev.kdiameter.network.message.flags.CommandFlags
 
 /**

@@ -1,4 +1,4 @@
-package me.beresnev.kdiameter.model
+package me.beresnev.kdiameter.network.message.avp
 
 import net.jcip.annotations.ThreadSafe
 

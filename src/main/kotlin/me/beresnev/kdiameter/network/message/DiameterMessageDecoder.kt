@@ -4,7 +4,7 @@ import me.beresnev.kdiameter.extensions.readByte
 import me.beresnev.kdiameter.extensions.readFourBytes
 import me.beresnev.kdiameter.extensions.readThreeBytes
 import me.beresnev.kdiameter.extensions.toUnsignedLong
-import me.beresnev.kdiameter.model.Avp
+import me.beresnev.kdiameter.network.message.avp.Avp
 import me.beresnev.kdiameter.network.message.flags.AvpFlags
 import me.beresnev.kdiameter.network.message.flags.CommandFlags
 import java.io.ByteArrayInputStream
