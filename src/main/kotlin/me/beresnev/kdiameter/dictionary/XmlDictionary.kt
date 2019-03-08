@@ -152,7 +152,7 @@ open class XmlDictionary : Dictionary {
     private fun parseAvps(doc: Document) {
         val avpElements = doc.getElementsByTagName("avp")
         for (avpElementNode in avpElements) {
-            val castedAvpElement = (avpElementNode as? Element) ?: throw IllegalArgumentException()
+            val castedAvpElement = avpElementNode as? Element ?: throw IllegalArgumentException()
             val avpAttributes = castedAvpElement.attributes
 
             val avpRepresentation = AvpRepresentation(

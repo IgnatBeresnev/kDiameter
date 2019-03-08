@@ -35,15 +35,11 @@ interface Dictionary {
 
     fun getCommand(code: Long): CommandRepresentation?
 
-    fun getAvp(code: Long): AvpRepresentation? {
-        return getAvp(code, 0L)
-    }
+    fun getAvp(code: Long) = getAvp(code, 0L)
 
     fun getAvp(code: Long, vendorId: Long): AvpRepresentation?
 
-    fun getAvp(name: String): AvpRepresentation? {
-        return getAvp(name, 0L)
-    }
+    fun getAvp(name: String) = getAvp(name, 0L)
 
     fun getAvp(name: String, vendorId: Long): AvpRepresentation?
 }
