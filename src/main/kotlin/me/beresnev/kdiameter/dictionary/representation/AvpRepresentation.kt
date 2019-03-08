@@ -44,12 +44,8 @@ data class AvpRepresentation(
         val code: Long
     )
 
-    fun isGrouped(): Boolean {
-        return groupedAvps.isNotEmpty()
-    }
+    fun isGrouped() = groupedAvps.isNotEmpty()
 
-    fun isEnum(): Boolean {
-        return enumValues.isNotEmpty()
-    }
+    fun isEnum() = enumValues.isNotEmpty()
 }
 

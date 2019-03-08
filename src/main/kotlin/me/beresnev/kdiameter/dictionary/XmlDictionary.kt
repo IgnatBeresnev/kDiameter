@@ -152,7 +152,7 @@ open class XmlDictionary : Dictionary {
     private fun parseAvps(doc: Document) {
         val avpElements = doc.getElementsByTagName("avp")
         for (avpElementNode in avpElements) {
-            val castedAvpElement = (avpElementNode as Element)
+            val castedAvpElement = (avpElementNode as? Element) ?: throw IllegalArgumentException()
             val avpAttributes = castedAvpElement.attributes
 
             val avpRepresentation = AvpRepresentation(
@@ -225,7 +225,7 @@ open class XmlDictionary : Dictionary {
             throw IllegalStateException("Expected one <grouped> within <avp>, got: ${groupedElements.length}")
         }
 
-        val groupedElement = (groupedElements.item(0) as Element)
+        val groupedElement = groupedElements.item(0) as? Element ?: throw IllegalArgumentException()
         val groupedAvps = groupedElement.getElementsByTagName("gavp")
         if (groupedAvps.isEmpty()) return emptyList()
 
@@ -247,27 +247,15 @@ open class XmlDictionary : Dictionary {
         }
     }
 
-    override fun getType(name: String): TypeRepresentation? {
-        return types[name]
-    }
+    override fun getType(name: String) = types[name]
 
-    override fun getApplication(id: Long): ApplicationRepresentation? {
-        return applications[id]
-    }
+    override fun getApplication(id: Long) = applications[id]
 
-    override fun getVendor(vendorId: String): VendorRepresentation? {
-        return vendors[vendorId]
-    }
+    override fun getVendor(vendorId: String) = vendors[vendorId]
 
-    override fun getCommand(code: Long): CommandRepresentation? {
-        return commands[code]
-    }
+    override fun getCommand(code: Long) = commands[code]
 
-    override fun getAvp(code: Long, vendorId: Long): AvpRepresentation? {
-        return avpsByCodeAndVendorId[code]?.get(vendorId)
-    }
+    override fun getAvp(code: Long, vendorId: Long) = avpsByCodeAndVendorId[code]?.get(vendorId)
 
-    override fun getAvp(name: String, vendorId: Long): AvpRepresentation? {
-        return avpsByNameAndVendorId[name]?.get(vendorId)
-    }
+    override fun getAvp(name: String, vendorId: Long) = avpsByNameAndVendorId[name]?.get(vendorId)
 }

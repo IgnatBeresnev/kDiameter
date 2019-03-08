@@ -27,9 +27,7 @@ class BitSet(
     private var bitHolder: Int = 0
 ) {
 
-    fun getAsInt(): Int {
-        return bitHolder
-    }
+    fun getAsInt() = bitHolder
 
     /**
      * @param bitIndex from 0 to 31

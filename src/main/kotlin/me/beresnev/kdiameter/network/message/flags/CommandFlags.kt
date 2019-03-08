@@ -72,6 +72,5 @@ data class CommandFlags(
         isProxiable = flags.get(6),
         isError = flags.get(5),
         isPotentiallyRetransmitted = flags.get(4)
-
     )
 }

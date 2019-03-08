@@ -23,17 +23,11 @@ import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 
-fun NamedNodeMap.getLong(name: String): Long {
-    return this.getNamedItem(name).nodeValue.toLong()
-}
+fun NamedNodeMap.getLong(name: String) = this.getNamedItem(name).nodeValue.toLong()
 
-fun NamedNodeMap.getString(name: String): String {
-    return this.getNamedItem(name).nodeValue
-}
+fun NamedNodeMap.getString(name: String) = this.getNamedItem(name).nodeValue
 
-fun NamedNodeMap.getNullableString(name: String): String? {
-    return this.getNamedItem(name)?.nodeValue
-}
+fun NamedNodeMap.getNullableString(name: String) = this.getNamedItem(name)?.nodeValue
 
 fun NamedNodeMap.getAsModalVerbOption(name: String, defaultValue: ModalAttribute): ModalAttribute {
     val stringValue = this.getNullableString(name) ?: return defaultValue
@@ -41,7 +35,7 @@ fun NamedNodeMap.getAsModalVerbOption(name: String, defaultValue: ModalAttribute
         "may" -> ModalAttribute.MAY
         "must" -> ModalAttribute.MUST
         "mustnot" -> ModalAttribute.MUST_NOT
-        else -> throw IllegalArgumentException("${stringValue} does not match any option")
+        else -> throw IllegalArgumentException("$stringValue does not match any option")
     }
 }
 
@@ -50,28 +44,25 @@ fun NamedNodeMap.getAsBinaryOption(name: String, defaultValue: Boolean): Boolean
     return when (stringValue.toLowerCase()) {
         "yes" -> true
         "no" -> false
-        else -> throw IllegalArgumentException("${stringValue} does not match any option")
+        else -> throw IllegalArgumentException("$stringValue does not match any option")
     }
 }
 
-fun NodeList.isEmpty(): Boolean {
-    return this.length == 0
-}
+fun NodeList.isEmpty() = this.length == 0
 
-operator fun NodeList.iterator(): Iterator<Node> {
-    return NodeIterator(this)
-}
+operator fun NodeList.iterator() = NodeIterator(this)
 
 @NotThreadSafe
 class NodeIterator(private val nodeList: NodeList) : Iterator<Node> {
-    private var currentIndex = 0
+    private var nextIndex = 0
     private val length = nodeList.length
 
     override fun next(): Node {
-        return nodeList.item(currentIndex++)
+        if (nextIndex >= length) {
+            throw NoSuchElementException()
+        }
+        return nodeList.item(nextIndex++)
     }
 
-    override fun hasNext(): Boolean {
-        return currentIndex < length
-    }
+    override fun hasNext() = nextIndex < length
 }

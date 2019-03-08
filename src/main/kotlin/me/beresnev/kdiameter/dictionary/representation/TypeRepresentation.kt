@@ -23,7 +23,5 @@ data class TypeRepresentation(
     val typeName: String,
     val typeParent: TypeRepresentation?
 ) {
-    fun isEnum(): Boolean {
-        return "Enumerated".equalsIgnoreCase(typeName)
-    }
+    fun isEnum() = "Enumerated".equalsIgnoreCase(typeName)
 }

@@ -36,11 +36,7 @@ class AvpsMap(avpList: List<Avp>) {
         return resultMap
     }
 
-    fun get(code: Long): Avp? {
-        return get(code, 0L)
-    }
+    fun get(code: Long) = get(code, 0L)
 
-    fun get(code: Long, vendorId: Long): Avp? {
-        return avpByCodeAndVendorId[code]?.get(vendorId)
-    }
+    fun get(code: Long, vendorId: Long) = avpByCodeAndVendorId[code]?.get(vendorId)
 }

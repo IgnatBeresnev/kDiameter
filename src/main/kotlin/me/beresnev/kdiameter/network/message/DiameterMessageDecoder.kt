@@ -92,9 +92,7 @@ object DiameterMessageDecoder {
         }
     }
 
-    fun decodeAvps(data: ByteArray): List<Avp> {
-        return decodeAvps(ByteArrayInputStream(data))
-    }
+    fun decodeAvps(data: ByteArray) = decodeAvps(ByteArrayInputStream(data))
 
     private fun decodeAvps(dataStream: InputStream): List<Avp> {
         if (dataStream.available() == 0) {

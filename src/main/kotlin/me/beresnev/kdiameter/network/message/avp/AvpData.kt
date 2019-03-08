@@ -38,23 +38,13 @@ import java.nio.charset.Charset
 class AvpData(
     private val rawData: ByteArray
 ) {
-    fun raw(): ByteArray {
-        return rawData
-    }
+    fun raw() = rawData
 
-    fun asUTF8String(): String {
-        return asString(Charsets.UTF_8)
-    }
+    fun asUTF8String() = asString(Charsets.UTF_8)
 
-    fun asString(charSet: Charset): String {
-        return String(rawData, charSet)
-    }
+    fun asString(charSet: Charset) = String(rawData, charSet)
 
-    fun asInt(): Int {
-        return FromByteConverter.toInt(rawData)
-    }
+    fun asInt() = FromByteConverter.toInt(rawData)
 
-    fun asGroupedAvps(): List<Avp> {
-        return DiameterMessageDecoder.decodeAvps(rawData)
-    }
+    fun asGroupedAvps() = DiameterMessageDecoder.decodeAvps(rawData)
 }

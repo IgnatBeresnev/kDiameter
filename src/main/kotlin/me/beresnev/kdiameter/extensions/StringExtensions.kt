@@ -17,6 +17,4 @@
 
 package me.beresnev.kdiameter.extensions
 
-fun String.equalsIgnoreCase(other: String): Boolean {
-    return this.equals(other, ignoreCase = true)
-}
+fun String.equalsIgnoreCase(other: String) = this.equals(other, ignoreCase = true)
