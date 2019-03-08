@@ -1,8 +1,0 @@
-<dictionary>
-    <avp name="EUI64-Address-Mask" code="528">
-        <grouped>
-            <gavp name="EUI64-Address"/>
-            <gavp name="EUI64-Address-Mask-Pattern"/>
-        </grouped>
-    </avp>
-</dictionary>

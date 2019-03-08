@@ -1,6 +1,0 @@
-<dictionary>
-    <typedefn type-name="OctetString"/>
-    <typedefn type-name="UTF8String" type-parent="OctetString"/>
-    <typedefn type-name="IPAddress" type-parent="OctetString"/>
-    <typedefn type-name="DiameterIdentity" type-parent="OctetString"/>
-</dictionary>

@@ -1,6 +1,0 @@
-<dictionary>
-    <application id="0" name="Diameter Common Messages" uri="http://tools.ietf.org/html/rfc6733"/>
-    <application id="3" name="Diameter Base Accounting" uri="http://tools.ietf.org/html/rfc6733"/>
-    <application id="9" name="Diameter QoS application" uri="http://tools.ietf.org/html/rfc5866"/>
-    <application id="16777239" name="Juniper Cluster" uri="none"/>
-</dictionary>
