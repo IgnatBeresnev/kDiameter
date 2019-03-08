@@ -42,9 +42,11 @@ class AvpData(
 
     fun asUTF8String() = asString(Charsets.UTF_8)
 
-    fun asString(charSet: Charset) = String(rawData, charSet)
+    fun asString(charSet: Charset) = FromByteConverter.toString(rawData, charSet)
 
     fun asInt() = FromByteConverter.toInt(rawData)
 
     fun asGroupedAvps() = DiameterMessageDecoder.decodeAvps(rawData)
+
+    fun asInetAddress() = FromByteConverter.toInetAddress(rawData)
 }

@@ -17,24 +17,32 @@
 
 package me.beresnev.kdiameter.converter
 
-object FromByteConverter {
-    /**
-     * Unsigned value is guaranteed to be within signed int bounds
-     */
-    fun toInt(b1: Int, b2: Int, b3: Int) = (b1 shl 16) + (b2 shl 8) + (b3 shl 0)
+import java.net.InetAddress
+import java.nio.charset.Charset
 
-    /**
-     * Might overflow
-     */
-    fun toInt(b1: Int, b2: Int, b3: Int, b4: Int) = (b1 shl 24) + (b2 shl 16) + (b3 shl 8) + (b4 shl 0)
+
+object FromByteConverter {
+
+    fun toString(data: ByteArray, charSet: Charset) = String(data, charSet)
 
     fun toInt(data: ByteArray): Int {
         if (data.size != 4) {
             throw IllegalArgumentException("Expected 4 bytes, got ${data.size}")
         }
-        return (data[0].toInt() shl 24) +
-                (data[1].toInt() shl 16) +
-                (data[2].toInt() shl 8) +
-                (data[3].toInt() shl 0)
+        return (data[0].toInt() shl 24) or
+                (data[1].toInt() and 0xFF shl 16) or
+                (data[2].toInt() and 0xFF shl 8) or
+                (data[3].toInt() and 0xFF)
+    }
+
+    fun toInetAddress(rawData: ByteArray): InetAddress {
+        try {
+            val isIPv6 = rawData[1].toInt() != 1
+            val address = ByteArray(if (isIPv6) 16 else 4)
+            System.arraycopy(rawData, 2, address, 0, address.size)
+            return InetAddress.getByAddress(address)
+        } catch (e: Exception) {
+            throw RuntimeException(e)
+        }
     }
 }

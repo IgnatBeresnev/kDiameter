@@ -18,6 +18,7 @@
 package me.beresnev.kdiameter.network.message
 
 
+import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -97,25 +98,31 @@ class DiameterMessageDecoderTest extends Specification {
 
         expect:
         def avp = diameterMessage.avpsMap.get(code)
-
-        if (expectedValue instanceof String) {
-            avp.avpData.asUTF8String() == expectedValue
-        } else if (expectedValue instanceof Integer) {
-            avp.avpData.asInt() == expectedValue
-        } else {
-            throw new IllegalStateException("Unknown value type")
-        }
+        getTypedAvpDataForExpectedValue(avp.avpData, expectedValue) == expectedValue
 
         where:
         code | expectedValue
         264L | "127.0.0.1"
         296L | "pcrf"
-        257L | "127.0.0.1"
+        257L | InetAddress.getByName("127.0.0.1")
         266L | 0
         269L | "PCRF-Tester"
         258L | 16777238
         267L | 1
         278L | 1176020954
+    }
+
+    @Ignore("helper function")
+    def getTypedAvpDataForExpectedValue(def avpData, def expectedValue) {
+        if (expectedValue instanceof String) {
+            return avpData.asUTF8String()
+        } else if (expectedValue instanceof Integer) {
+            return avpData.asInt()
+        } else if (expectedValue instanceof InetAddress) {
+            return avpData.asInetAddress()
+        } else {
+            throw new IllegalStateException("Unknown value type")
+        }
     }
 
     def "should decode CER AVPs and assert flags"() {

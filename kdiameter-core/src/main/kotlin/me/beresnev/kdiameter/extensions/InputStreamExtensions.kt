@@ -17,7 +17,6 @@
 
 package me.beresnev.kdiameter.extensions
 
-import me.beresnev.kdiameter.converter.FromByteConverter
 import java.io.InputStream
 
 /**
@@ -41,7 +40,7 @@ fun InputStream.readThreeBytes(): Int {
     if (b1 or b2 or b3 < 0) {
         throw IllegalStateException("EOF")
     }
-    return FromByteConverter.toInt(b1, b2, b3)
+    return (b1 shl 16) + (b2 shl 8) + (b3 shl 0)
 }
 
 /**
@@ -55,5 +54,5 @@ fun InputStream.readFourBytes(): Int {
     if (b1 or b2 or b3 or b4 < 0) {
         throw IllegalStateException("EOF")
     }
-    return FromByteConverter.toInt(b1, b2, b3, b4)
+    return (b1 shl 24) + (b2 shl 16) + (b3 shl 8) + (b4 shl 0)
 }

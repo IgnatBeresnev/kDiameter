@@ -4,7 +4,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.4'
 }
 
-apply from: 'gradle/version.gradle'
+apply from: "$rootProject.rootDir/gradle/version.gradle"
 
 group 'me.beresnev'
 version = project.ext.versionInfo.fullVersion()

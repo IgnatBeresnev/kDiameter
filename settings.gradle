@@ -1,2 +1,3 @@
 rootProject.name = 'kdiameter'
+include 'kdiameter-core'
 
