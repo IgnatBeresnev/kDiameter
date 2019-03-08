@@ -1,6 +1,21 @@
-package me.beresnev.kdiameter.converter
+/*
+ * Copyright (C) 2019 Ignat Beresnev and individual contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
-import java.net.InetAddress
+package me.beresnev.kdiameter.converter
 
 object FromByteConverter {
     // unsigned value is guaranteed to be within signed int bounds
@@ -21,36 +36,5 @@ object FromByteConverter {
                 (data[1].toInt() shl 16) +
                 (data[2].toInt() shl 8) +
                 (data[3].toInt() shl 0)
-    }
-
-//    fun toInetAddress(rawData: ByteArray): InetAddress {
-//        try {
-//            // The IPAddress format is derived from the OctetString AVP Base
-//            // Format. It represents 32 bit (IPv4) [17] or 128 bit (IPv6) [16]
-//            // address, most significant octet first. The format of the
-//            // address (IPv4 or IPv6) is determined by the length. If the
-//            // attribute value is an IPv4 address, the AVP Length field MUST
-//            // be 12 (16 if 'V' bit is enabled), otherwise the AVP Length
-//            // field MUST be set to 24 (28 if the 'V' bit is enabled) for IPv6
-//            // addresses.
-//            val address = Arrays.copyOfRange(rawData, 2, rawData.size)
-//            return InetAddress.getByAddress(address)
-//        } catch (e: Exception) {
-//            throw IllegalStateException(e)
-//        }
-//    }
-
-    fun toInetAddress(rawData: ByteArray): InetAddress {
-        val inetAddress: InetAddress
-        try {
-            val isIPv6 = rawData[1].toInt() != 1
-            val address = ByteArray(if (isIPv6) 16 else 4)
-            System.arraycopy(rawData, 2, address, 0, address.size)
-            inetAddress = if (isIPv6) InetAddress.getByAddress(address) else InetAddress.getByAddress(address)
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
-
-        return inetAddress
     }
 }
