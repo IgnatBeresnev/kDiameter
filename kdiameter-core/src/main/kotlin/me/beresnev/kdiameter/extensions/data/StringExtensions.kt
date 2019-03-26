@@ -15,6 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.beresnev.kdiameter.extensions
+package me.beresnev.kdiameter.extensions.data
 
 fun String.equalsIgnoreCase(other: String) = this.equals(other, ignoreCase = true)

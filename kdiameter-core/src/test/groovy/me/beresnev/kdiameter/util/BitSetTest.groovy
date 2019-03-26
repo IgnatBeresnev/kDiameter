@@ -50,14 +50,26 @@ class BitSetTest extends Specification {
         bitSet.set(1, secondBit)
         bitSet.set(0, firstBit)
 
-        bitSet.getAsInt() == bitHolder
+        bitSet.asInt() == intBitHolder
 
         where:
-        fourthBit | thirdBit | secondBit | firstBit | bitHolder
+        fourthBit | thirdBit | secondBit | firstBit | intBitHolder
         false     | false    | false     | true     | 1  // 0001
         false     | false    | true      | true     | 3  // 0011
         false     | true     | true      | true     | 7  // 0111
         true      | true     | true      | true     | 15 // 1111
+    }
+
+    def "should return -1 if bitHolder overflows asByte"() {
+        given:
+        def bitSet = new BitSet(842934)
+
+        when:
+        bitSet.assertInByteRange()
+
+        then:
+        IndexOutOfBoundsException e = thrown()
+        e.message == "OutOfBounds for 842934"
     }
 
     def "should throw IndexOutOfBounds for bit index below zero"() {

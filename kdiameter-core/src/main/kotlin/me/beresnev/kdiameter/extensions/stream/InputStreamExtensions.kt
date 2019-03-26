@@ -15,11 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.beresnev.kdiameter.extensions
+package me.beresnev.kdiameter.extensions.stream
 
 import java.io.InputStream
 
 /**
+ * Data from InputStream MUST be masked off (& 0xFF)
+ *
  * @throws IllegalStateException if end of stream reached (read value is -1)
  */
 fun InputStream.readByte(): Int {
@@ -31,6 +33,8 @@ fun InputStream.readByte(): Int {
 }
 
 /**
+ * Data from InputStream MUST be masked off (& 0xFF)
+ *
  * @throws IllegalStateException if end of stream reached (read value is -1)
  */
 fun InputStream.readThreeBytes(): Int {
@@ -44,6 +48,8 @@ fun InputStream.readThreeBytes(): Int {
 }
 
 /**
+ * Data from InputStream MUST be masked off (& 0xFF)
+ *
  * @throws IllegalStateException if end of stream reached (read value is -1)
  */
 fun InputStream.readFourBytes(): Int {

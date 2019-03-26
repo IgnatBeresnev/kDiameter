@@ -73,4 +73,18 @@ data class CommandFlags(
         isError = flags.get(5),
         isPotentiallyRetransmitted = flags.get(4)
     )
+
+    /**
+     * @see me.beresnev.kdiameter.util.BitSet.assertInByteRange
+     */
+    fun getAsAssertedByte(): Int {
+        val bitSet = BitSet()
+        bitSet.set(7, isRequest)
+        bitSet.set(6, isProxiable)
+        bitSet.set(5, isError)
+        bitSet.set(4, isPotentiallyRetransmitted)
+
+        bitSet.assertInByteRange()
+        return bitSet.asInt()
+    }
 }

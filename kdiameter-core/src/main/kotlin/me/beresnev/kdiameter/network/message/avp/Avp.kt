@@ -33,7 +33,7 @@ import me.beresnev.kdiameter.network.message.flags.AvpFlags
  * allocated by IANA (see Section 11.1.1).
  *
  * >> AVP Flags
- * @see [me.beresnev.kdiameter.network.message.AvpFlags]
+ * @see me.beresnev.kdiameter.network.message.flags.AvpFlags
  *
  * >> Vendor-ID
  * The Vendor-ID field is present if the 'V' bit is set in the AVP

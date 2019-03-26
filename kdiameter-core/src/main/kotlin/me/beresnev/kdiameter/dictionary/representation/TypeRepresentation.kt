@@ -17,7 +17,7 @@
 
 package me.beresnev.kdiameter.dictionary.representation
 
-import me.beresnev.kdiameter.extensions.equalsIgnoreCase
+import me.beresnev.kdiameter.extensions.data.equalsIgnoreCase
 
 data class TypeRepresentation(
     val typeName: String,

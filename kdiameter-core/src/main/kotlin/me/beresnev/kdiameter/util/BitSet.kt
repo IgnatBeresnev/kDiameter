@@ -22,12 +22,18 @@ import net.jcip.annotations.NotThreadSafe
 /**
  * Allows a maximum of 32 bits to be stored
  */
-@NotThreadSafe // as well as subject to word tearing
+@NotThreadSafe // subject to word tearing
 class BitSet(
     private var bitHolder: Int = 0
 ) {
 
-    fun getAsInt() = bitHolder
+    fun asInt() = bitHolder
+
+    fun assertInByteRange() {
+        if (bitHolder !in 0..127) {
+            throw ArrayIndexOutOfBoundsException("OutOfBounds for $bitHolder")
+        }
+    }
 
     /**
      * @param bitIndex from 0 to 31

@@ -17,10 +17,10 @@
 
 package me.beresnev.kdiameter.network.message
 
-import me.beresnev.kdiameter.extensions.readByte
-import me.beresnev.kdiameter.extensions.readFourBytes
-import me.beresnev.kdiameter.extensions.readThreeBytes
-import me.beresnev.kdiameter.extensions.toUnsignedLong
+import me.beresnev.kdiameter.extensions.data.toUnsignedLong
+import me.beresnev.kdiameter.extensions.stream.readByte
+import me.beresnev.kdiameter.extensions.stream.readFourBytes
+import me.beresnev.kdiameter.extensions.stream.readThreeBytes
 import me.beresnev.kdiameter.network.message.avp.Avp
 import me.beresnev.kdiameter.network.message.flags.AvpFlags
 import me.beresnev.kdiameter.network.message.flags.CommandFlags
@@ -46,6 +46,8 @@ object DiameterMessageDecoder {
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      * |                             AVPs ...                          |
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+     *
+     * @see DiameterMessageEncoder.encode
      */
     fun decode(message: ByteArray): DiameterMessage {
         val dataStream = ByteArrayInputStream(message)
@@ -118,6 +120,8 @@ object DiameterMessageDecoder {
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      * |                            Data ...                         |
      * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+     *
+     * @see DiameterMessageEncoder.writeAvp
      */
     private fun decodeAvp(dataStream: InputStream): Avp {
         val avpCode = dataStream.readFourBytes().toUnsignedLong()
@@ -136,7 +140,7 @@ object DiameterMessageDecoder {
         // since we already read some of the bytes from the stream,
         // we need to calculate how many bytes are left for data
         // dataLength = avpLength - 4(code) - 1(flags) - 3(length) [- 4 (vendor)]
-        val dataLength = avpLength - 8 - if (hasVendorId) 4 else 0
+        val dataLength = avpLength - 8 - (if (hasVendorId) 4 else 0)
 
         val rawData = ByteArray(dataLength)
         dataStream.read(rawData, 0, dataLength)
@@ -155,12 +159,16 @@ object DiameterMessageDecoder {
      *
      * NOTE! "The length of the padding is not reflected in the AVP Length field."
      * This is the reason we need to skip empty padding bytes.
+     *
+     * @see DiameterMessageEncoder.alignDataIfNeeded
      */
     private fun skipPadding(avpLength: Int, dataStream: InputStream) {
         var avpLengthWithPadding = avpLength.toLong()
         do {
             // https://en.wikipedia.org/wiki/Data_structure_alignment#Computing_padding
             val padding = (4L - avpLengthWithPadding % 4L) % 4L
+
+            // might skip less than what we ask for
             avpLengthWithPadding += dataStream.skip(padding)
         } while (avpLengthWithPadding % 4L != 0L)
     }

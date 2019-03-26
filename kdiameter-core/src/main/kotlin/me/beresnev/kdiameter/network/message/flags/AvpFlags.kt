@@ -73,4 +73,17 @@ data class AvpFlags(
         isMandatory = flags.get(6),
         isProtected = flags.get(5)
     )
+
+    /**
+     * @see me.beresnev.kdiameter.util.BitSet.assertInByteRange
+     */
+    fun getAsAssertedByte(): Int {
+        val bitSet = BitSet()
+        bitSet.set(7, isVendorSpecific)
+        bitSet.set(6, isMandatory)
+        bitSet.set(5, isProtected)
+
+        bitSet.assertInByteRange()
+        return bitSet.asInt()
+    }
 }

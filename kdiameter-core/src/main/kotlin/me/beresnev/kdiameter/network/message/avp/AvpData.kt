@@ -36,6 +36,12 @@ import java.nio.charset.Charset
  */
 @ThreadSafe
 class AvpData(
+    /**
+     * Must NOT contain padding, this is a higher-level newbie-friendly
+     * typical bytes array for an object. Actual alignment happens elsewhere
+     *
+     * @see me.beresnev.kdiameter.network.message.DiameterMessageEncoder.alignDataIfNeeded
+     */
     private val rawData: ByteArray
 ) {
     fun raw() = rawData

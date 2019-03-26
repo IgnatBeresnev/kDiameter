@@ -20,7 +20,6 @@ package me.beresnev.kdiameter.converter
 import java.net.InetAddress
 import java.nio.charset.Charset
 
-
 object FromByteConverter {
 
     fun toString(data: ByteArray, charSet: Charset) = String(data, charSet)
@@ -29,20 +28,16 @@ object FromByteConverter {
         if (data.size != 4) {
             throw IllegalArgumentException("Expected 4 bytes, got ${data.size}")
         }
-        return (data[0].toInt() shl 24) or
+        return data[0].toInt() shl 24 or
                 (data[1].toInt() and 0xFF shl 16) or
                 (data[2].toInt() and 0xFF shl 8) or
                 (data[3].toInt() and 0xFF)
     }
 
     fun toInetAddress(rawData: ByteArray): InetAddress {
-        try {
-            val isIPv6 = rawData[1].toInt() != 1
-            val address = ByteArray(if (isIPv6) 16 else 4)
-            System.arraycopy(rawData, 2, address, 0, address.size)
-            return InetAddress.getByAddress(address)
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
+        val isIPv6 = rawData[1].toInt() != 1
+        val address = ByteArray(if (isIPv6) 16 else 4)
+        System.arraycopy(rawData, 2, address, 0, address.size)
+        return InetAddress.getByAddress(address)
     }
 }

@@ -23,7 +23,7 @@ import me.beresnev.kdiameter.dictionary.representation.CommandRepresentation
 import me.beresnev.kdiameter.dictionary.representation.TypeRepresentation
 import me.beresnev.kdiameter.dictionary.representation.VendorRepresentation
 import me.beresnev.kdiameter.dictionary.representation.attributes.ModalAttribute
-import me.beresnev.kdiameter.extensions.equalsIgnoreCase
+import me.beresnev.kdiameter.extensions.data.equalsIgnoreCase
 import me.beresnev.kdiameter.extensions.getAsBinaryOption
 import me.beresnev.kdiameter.extensions.getAsModalVerbOption
 import me.beresnev.kdiameter.extensions.getLong
