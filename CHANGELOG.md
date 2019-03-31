@@ -1,3 +1,9 @@
+0.0.6
+-----
+* Diameter message encoder. Convert message DTOs to bytes
+* Basic tests based on a real CER dump
+* Codacy and travis checks, GNU GPL license
+
 0.0.5
 -----
 * Diameter message decoder. Convert received bytes to human-usable message
