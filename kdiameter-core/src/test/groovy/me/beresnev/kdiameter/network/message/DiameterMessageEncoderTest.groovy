@@ -24,7 +24,7 @@ import spock.lang.Specification
 
 class DiameterMessageEncoderTest extends Specification {
 
-    def "should encode diameterMessage without AVPs"() {
+    def "should encode message meta info without AVPs"() {
         given:
         CommandFlags commandFlags = new CommandFlags(true, false, false, false)
         def commandCode = 257 // TODO [beresnev] change to constant
@@ -64,7 +64,7 @@ class DiameterMessageEncoderTest extends Specification {
         encodedAvps == DiameterMessageDump.CER_DUMP_ONLY_AVPS
     }
 
-    def "should encode full diameter message with meta info and AVPs"() {
+    def "should encode full message with meta info and AVPs"() {
         given:
         CommandFlags commandFlags = new CommandFlags(true, false, false, false)
         def commandCode = 257 // TODO [beresnev] change to constant

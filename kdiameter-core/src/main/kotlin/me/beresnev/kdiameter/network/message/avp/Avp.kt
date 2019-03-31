@@ -64,22 +64,19 @@ class Avp private constructor(
 ) {
     companion object {
         @JvmStatic
-        fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: Int): Avp {
-            return create(code, avpFlags, vendorId, ToByteConverter.fromInt(value))
-        }
+        fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: Int) =
+            create(code, avpFlags, vendorId, ToByteConverter.fromInt(value))
 
         @JvmStatic
-        fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: String): Avp {
-            return create(code, avpFlags, vendorId, value.toByteArray())
-        }
+        fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: String) =
+            create(code, avpFlags, vendorId, value.toByteArray())
 
         @JvmStatic
-        fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, inetAddress: InetAddress): Avp {
-            return create(code, avpFlags, vendorId, ToByteConverter.fromInetAddress(inetAddress))
-        }
+        fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, inetAddress: InetAddress) =
+            create(code, avpFlags, vendorId, ToByteConverter.fromInetAddress(inetAddress))
 
-        fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: ByteArray): Avp {
-            return Avp(code, avpFlags, vendorId, AvpData(value))
-        }
+        @JvmStatic
+        fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: ByteArray) =
+            Avp(code, avpFlags, vendorId, AvpData(value))
     }
 }
