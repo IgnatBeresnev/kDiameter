@@ -27,7 +27,7 @@ class DiameterMessageEncoderTest extends Specification {
     def "should encode message meta info without AVPs"() {
         given:
         CommandFlags commandFlags = new CommandFlags(true, false, false, false)
-        def commandCode = 257 // TODO [beresnev] change to constant
+        def commandCode = 257
         def applicationId = 0
         def hopByHop = 0x4618a7cc
         def endToEnd = 0x0ce00000
@@ -67,7 +67,7 @@ class DiameterMessageEncoderTest extends Specification {
     def "should encode full message with meta info and AVPs"() {
         given:
         CommandFlags commandFlags = new CommandFlags(true, false, false, false)
-        def commandCode = 257 // TODO [beresnev] change to constant
+        def commandCode = 257
         def applicationId = 0
         def hopByHop = 0x4618a7cc
         def endToEnd = 0x0ce00000

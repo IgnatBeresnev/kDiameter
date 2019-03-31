@@ -43,7 +43,6 @@ object DiameterMessageEncoder {
      *
      * @see DiameterMessageDecoder.decode
      */
-    // TODO [beresnev] separate test
     fun encode(message: DiameterMessage): ByteArray {
         val encodedAvps = encodeAvps(message.avps)
 
@@ -64,7 +63,6 @@ object DiameterMessageEncoder {
         return byteStream.toByteArray()
     }
 
-    // TODO [beresnev] separate test
     fun encodeAvps(avps: List<Avp>): ByteArray {
         val byteStream = ByteArrayOutputStream()
         avps.forEach { avp -> writeAvp(avp, byteStream) }
@@ -105,11 +103,11 @@ object DiameterMessageEncoder {
         // AVP Code (4) + flags (1) + AVP Length (3) = 8
         val avpLength = 8 + (if (vendorId != null) 4 else 0) + dataLength
 
-        byteStream.writeFourBytes(avp.code) // TODO [beresnev] test for overflow on > Int.MAX_VALUE
+        byteStream.writeFourBytes(avp.code)
         byteStream.writeByte(avp.avpFlags.getAsAssertedByte())
         byteStream.writeThreeBytes(avpLength)
         if (vendorId != null) {
-            byteStream.writeFourBytes(vendorId) // TODO [beresnev] test for overflow on > Int.MAX_VALUE
+            byteStream.writeFourBytes(vendorId)
         }
         byteStream.write(alignedData)
     }
@@ -125,7 +123,6 @@ object DiameterMessageEncoder {
      *
      * @see DiameterMessageDecoder.skipPadding
      */
-    // TODO [beresnev] separate test
     private fun alignDataIfNeeded(data: ByteArray): ByteArray {
         val dataSize = data.size
         if (dataSize % 4 == 0) {
