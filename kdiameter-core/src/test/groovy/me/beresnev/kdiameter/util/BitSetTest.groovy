@@ -65,7 +65,7 @@ class BitSetTest extends Specification {
         def bitSet = new BitSet(842934)
 
         when:
-        bitSet.assertInByteRange()
+        bitSet.assertInUnsignedByteRange()
 
         then:
         IndexOutOfBoundsException e = thrown()

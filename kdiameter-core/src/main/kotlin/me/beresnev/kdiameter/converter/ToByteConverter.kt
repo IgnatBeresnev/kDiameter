@@ -17,13 +17,44 @@
 
 package me.beresnev.kdiameter.converter
 
+import me.beresnev.kdiameter.constants.AddressFamily
+import java.net.Inet4Address
+import java.net.Inet6Address
+import java.net.InetAddress
+
 object ToByteConverter {
-    fun toByteArray(value: Int): ByteArray {
+    fun fromInt(value: Int): ByteArray {
         return byteArrayOf(
             value.ushr(24).toByte(),
             value.ushr(16).toByte(),
             value.ushr(8).toByte(),
             value.toByte()
         )
+    }
+
+    /**
+     * Address
+     * The Address format is derived from the OctetString Basic AVP
+     * Format.  It is a discriminated union representing, for example, a
+     * 32-bit (IPv4) [RFC0791] or 128-bit (IPv6) [RFC4291] address, most
+     * significant octet first.  The first two octets of the Address AVP
+     * represent the AddressType, which contains an Address Family,
+     * defined in [IANAADFAM].  The AddressType is used to discriminate
+     * the content and format of the remaining octets.
+     */
+    fun fromInetAddress(inputAddress: InetAddress): ByteArray {
+        val actualAddressBytes = inputAddress.address
+        val outputAddressBytes = ByteArray(actualAddressBytes.size + 2)
+
+        val addressType = when (inputAddress) {
+            is Inet4Address -> AddressFamily.IPV4.num
+            is Inet6Address -> AddressFamily.IPV6.num
+            else -> throw IllegalArgumentException("Unknown InetAddress: $inputAddress")
+        }
+        outputAddressBytes[0] = (addressType shr 8 and 0xFF).toByte()
+        outputAddressBytes[1] = (addressType shr 0 and 0xFF).toByte()
+
+        System.arraycopy(actualAddressBytes, 0, outputAddressBytes, 2, actualAddressBytes.size)
+        return outputAddressBytes
     }
 }

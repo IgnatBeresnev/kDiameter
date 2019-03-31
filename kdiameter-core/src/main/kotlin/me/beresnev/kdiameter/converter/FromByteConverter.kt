@@ -17,6 +17,7 @@
 
 package me.beresnev.kdiameter.converter
 
+import me.beresnev.kdiameter.constants.AddressFamily
 import java.net.InetAddress
 import java.nio.charset.Charset
 
@@ -34,8 +35,18 @@ object FromByteConverter {
                 (data[3].toInt() and 0xFF)
     }
 
+    /**
+     * Address
+     * The Address format is derived from the OctetString Basic AVP
+     * Format.  It is a discriminated union representing, for example, a
+     * 32-bit (IPv4) [RFC0791] or 128-bit (IPv6) [RFC4291] address, most
+     * significant octet first.  The first two octets of the Address AVP
+     * represent the AddressType, which contains an Address Family,
+     * defined in [AddressFamily]. The AddressType is used to discriminate
+     * the content and format of the remaining octets.
+     */
     fun toInetAddress(rawData: ByteArray): InetAddress {
-        val isIPv6 = rawData[1].toInt() != 1
+        val isIPv6 = rawData[1].toInt() != AddressFamily.IPV4.num
         val address = ByteArray(if (isIPv6) 16 else 4)
         System.arraycopy(rawData, 2, address, 0, address.size)
         return InetAddress.getByAddress(address)

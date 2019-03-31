@@ -29,8 +29,8 @@ class BitSet(
 
     fun asInt() = bitHolder
 
-    fun assertInByteRange() {
-        if (bitHolder !in 0..127) {
+    fun assertInUnsignedByteRange() {
+        if (bitHolder !in 0..128) {
             throw ArrayIndexOutOfBoundsException("OutOfBounds for $bitHolder")
         }
     }

@@ -19,6 +19,7 @@ package me.beresnev.kdiameter.network.message.avp
 
 import me.beresnev.kdiameter.converter.ToByteConverter
 import me.beresnev.kdiameter.network.message.flags.AvpFlags
+import java.net.InetAddress
 
 /**
  * Diameter AVPs carry specific authentication, accounting,
@@ -62,31 +63,23 @@ class Avp private constructor(
     val avpData: AvpData
 ) {
     companion object {
+        @JvmStatic
         fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: Int): Avp {
-            return create(
-                code,
-                avpFlags,
-                vendorId,
-                ToByteConverter.toByteArray(value)
-            )
+            return create(code, avpFlags, vendorId, ToByteConverter.fromInt(value))
         }
 
+        @JvmStatic
         fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: String): Avp {
-            return create(
-                code,
-                avpFlags,
-                vendorId,
-                value.toByteArray()
-            )
+            return create(code, avpFlags, vendorId, value.toByteArray())
+        }
+
+        @JvmStatic
+        fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, inetAddress: InetAddress): Avp {
+            return create(code, avpFlags, vendorId, ToByteConverter.fromInetAddress(inetAddress))
         }
 
         fun create(code: Long, avpFlags: AvpFlags, vendorId: Long?, value: ByteArray): Avp {
-            return Avp(
-                code,
-                avpFlags,
-                vendorId,
-                AvpData(value)
-            )
+            return Avp(code, avpFlags, vendorId, AvpData(value))
         }
     }
 }

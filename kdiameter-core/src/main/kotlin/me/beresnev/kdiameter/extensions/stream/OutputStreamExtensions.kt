@@ -39,7 +39,7 @@ import java.io.OutputStream
 // just a more clear name as to what we're writing,
 // and a range check, so as not to associate int with 4 bytes
 fun OutputStream.writeByte(byte: Int) {
-    if (byte !in 0..127) throw IllegalArgumentException("OutOfBounds for $byte")
+    if (byte !in 0..128) throw IllegalArgumentException("OutOfBounds for $byte")
     this.write(byte)
 }
 
