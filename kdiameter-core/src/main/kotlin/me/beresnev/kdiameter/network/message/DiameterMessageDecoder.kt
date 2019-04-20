@@ -101,11 +101,11 @@ object DiameterMessageDecoder {
             return emptyList()
         }
 
-        val avps = ArrayList<Avp>()
-        while (dataStream.available() > 0) {
-            avps.add(decodeAvp(dataStream))
+        return ArrayList<Avp>().apply {
+            while (dataStream.available() > 0) {
+                add(decodeAvp(dataStream))
+            }
         }
-        return avps
     }
 
     /**

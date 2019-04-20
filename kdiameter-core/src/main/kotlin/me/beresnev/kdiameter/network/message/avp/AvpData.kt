@@ -54,5 +54,7 @@ class AvpData(
 
     fun asGroupedAvps() = DiameterMessageDecoder.decodeAvps(rawData)
 
+    fun asGroupedAvpsMap() = AvpsMap(asGroupedAvps())
+
     fun asInetAddress() = FromByteConverter.toInetAddress(rawData)
 }

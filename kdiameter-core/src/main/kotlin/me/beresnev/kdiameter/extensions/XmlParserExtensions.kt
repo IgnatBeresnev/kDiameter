@@ -50,6 +50,14 @@ fun NamedNodeMap.getAsBinaryOption(name: String, defaultValue: Boolean): Boolean
 
 fun NodeList.isEmpty() = this.length == 0
 
+fun <R> NodeList.mapToList(map: (Node) -> R): List<R> {
+    return ArrayList<R>().apply {
+        for (elem in this@mapToList) {
+            add(map(elem))
+        }
+    }
+}
+
 operator fun NodeList.iterator() = NodeIterator(this)
 
 @NotThreadSafe

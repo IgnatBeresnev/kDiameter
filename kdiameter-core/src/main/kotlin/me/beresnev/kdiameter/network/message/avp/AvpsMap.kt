@@ -28,12 +28,12 @@ class AvpsMap(avpList: List<Avp>) {
     }
 
     private fun buildMap(avpList: List<Avp>): Map<Long, Map<Long, Avp>> {
-        val resultMap: MutableMap<Long, MutableMap<Long, Avp>> = HashMap()
-        avpList.forEach { avp ->
-            val vendorId = if (avp.vendorId == null) 0 else avp.vendorId
-            resultMap.getOrPut(avp.code) { HashMap() }[vendorId] = avp
+        return HashMap<Long, MutableMap<Long, Avp>>().apply {
+            avpList.forEach { avp ->
+                val vendorId = avp.vendorId ?: 0
+                getOrPut(avp.code) { HashMap() }[vendorId] = avp
+            }
         }
-        return resultMap
     }
 
     fun get(code: Long) = get(code, 0L)

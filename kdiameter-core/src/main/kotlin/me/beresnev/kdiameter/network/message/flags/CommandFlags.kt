@@ -78,13 +78,13 @@ data class CommandFlags(
      * @see me.beresnev.kdiameter.util.BitSet.assertInUnsignedByteRange
      */
     fun getAsAssertedByte(): Int {
-        val bitSet = BitSet()
-        bitSet.set(7, isRequest)
-        bitSet.set(6, isProxiable)
-        bitSet.set(5, isError)
-        bitSet.set(4, isPotentiallyRetransmitted)
+        return BitSet().apply {
+            set(7, isRequest)
+            set(6, isProxiable)
+            set(5, isError)
+            set(4, isPotentiallyRetransmitted)
 
-        bitSet.assertInUnsignedByteRange()
-        return bitSet.asInt()
+            assertInUnsignedByteRange()
+        }.asInt()
     }
 }

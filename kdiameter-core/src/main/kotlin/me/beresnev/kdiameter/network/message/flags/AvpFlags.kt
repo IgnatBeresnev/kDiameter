@@ -78,12 +78,12 @@ data class AvpFlags(
      * @see me.beresnev.kdiameter.util.BitSet.assertInUnsignedByteRange
      */
     fun getAsAssertedByte(): Int {
-        val bitSet = BitSet()
-        bitSet.set(7, isVendorSpecific)
-        bitSet.set(6, isMandatory)
-        bitSet.set(5, isProtected)
+        return BitSet().apply {
+            set(7, isVendorSpecific)
+            set(6, isMandatory)
+            set(5, isProtected)
 
-        bitSet.assertInUnsignedByteRange()
-        return bitSet.asInt()
+            assertInUnsignedByteRange()
+        }.asInt()
     }
 }

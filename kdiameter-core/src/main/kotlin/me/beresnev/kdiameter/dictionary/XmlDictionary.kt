@@ -31,6 +31,7 @@ import me.beresnev.kdiameter.extensions.getNullableString
 import me.beresnev.kdiameter.extensions.getString
 import me.beresnev.kdiameter.extensions.isEmpty
 import me.beresnev.kdiameter.extensions.iterator
+import me.beresnev.kdiameter.extensions.mapToList
 import net.jcip.annotations.NotThreadSafe
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -178,14 +179,16 @@ open class XmlDictionary : Dictionary {
      * @return default vendor if vendor-id is not set
      */
     private fun extractAvpVendor(attributes: NamedNodeMap): VendorRepresentation {
-        val vendorId = attributes.getNullableString("vendor-id")
-        return (if (vendorId == null) vendors[DEF_VENDOR_ID] else vendors[vendorId]) ?: throw IllegalStateException()
+        return attributes.getNullableString("vendor-id").let { id ->
+            (if (id == null) vendors[DEF_VENDOR_ID] else vendors[id]) ?: throw IllegalStateException()
+        }
     }
 
     private fun extractAvpType(avpElement: Element): TypeRepresentation? {
-        val typeElement = avpElement.getElementsByTagName("type")
+        val typeName = avpElement.getElementsByTagName("type").let { type ->
+            type.item(0)?.attributes?.getString("type-name") ?: return null
+        }
 
-        val typeName = typeElement.item(0)?.attributes?.getString("type-name") ?: return null
         return types[typeName]
     }
 
@@ -198,17 +201,14 @@ open class XmlDictionary : Dictionary {
         val enumElements = avpElement.getElementsByTagName("enum")
         if (enumElements.isEmpty()) return emptyList()
 
-        val enumValues = ArrayList<AvpRepresentation.Enum>()
-        for (enumElement in enumElements) { // cannot be made into stream since not Iterable<>
-            val enumAttributes = enumElement.attributes
-            enumValues.add(
+        return enumElements.mapToList {
+            with(it.attributes) {
                 AvpRepresentation.Enum(
-                    name = enumAttributes.getString("name"),
-                    code = enumAttributes.getLong("code")
+                    name = this.getString("name"),
+                    code = this.getLong("code")
                 )
-            )
+            }
         }
-        return enumValues
     }
 
     // <avp name="Proxy-Info" code="284" mandatory="must" may-encrypt="no" protected="mustnot" vendor-bit="mustnot">
@@ -218,22 +218,22 @@ open class XmlDictionary : Dictionary {
     //     </grouped>
     // </avp>
     private fun extractGroupedValues(avpElement: Element): List<AvpRepresentation.GroupedAvp> {
-        val groupedElements = avpElement.getElementsByTagName("grouped")
-        if (groupedElements.isEmpty()) {
-            return emptyList()
-        } else if (groupedElements.length != 1) {
-            throw IllegalStateException("Expected one <grouped> within <avp>, got: ${groupedElements.length}")
+        val groupedElement = avpElement.getElementsByTagName("grouped").let { gavp ->
+            if (gavp.isEmpty()) {
+                return emptyList()
+            } else if (gavp.length != 1) {
+                throw IllegalStateException("Expected one <grouped> within <avp>, got: ${gavp.length}")
+            }
+
+            gavp.item(0) as? Element ?: throw IllegalArgumentException()
         }
 
-        val groupedElement = groupedElements.item(0) as? Element ?: throw IllegalArgumentException()
         val groupedAvps = groupedElement.getElementsByTagName("gavp")
         if (groupedAvps.isEmpty()) return emptyList()
 
-        val groupedValues = ArrayList<AvpRepresentation.GroupedAvp>()
-        for (avp in groupedAvps) {
-            groupedValues.add(AvpRepresentation.GroupedAvp(avp.attributes.getString("name")))
+        return groupedAvps.mapToList {
+            AvpRepresentation.GroupedAvp(it.attributes.getString("name"))
         }
-        return groupedValues
     }
 
     private fun executeOnAllNamedElementsAttributes(
@@ -241,9 +241,8 @@ open class XmlDictionary : Dictionary {
         elementName: String,
         attributesExecutable: (attributes: NamedNodeMap) -> Unit
     ) {
-        val elementsByTagName = doc.getElementsByTagName(elementName)
-        elementsByTagName.iterator().forEachRemaining {
-            attributesExecutable.invoke(it.attributes)
+        doc.getElementsByTagName(elementName).iterator().forEachRemaining {
+            attributesExecutable(it.attributes)
         }
     }
 

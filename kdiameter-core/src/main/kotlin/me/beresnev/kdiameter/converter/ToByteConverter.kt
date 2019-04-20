@@ -44,17 +44,16 @@ object ToByteConverter {
      */
     fun fromInetAddress(inputAddress: InetAddress): ByteArray {
         val actualAddressBytes = inputAddress.address
-        val outputAddressBytes = ByteArray(actualAddressBytes.size + 2)
+        return ByteArray(actualAddressBytes.size + 2).apply {
+            val addressType = when (inputAddress) {
+                is Inet4Address -> AddressFamily.IPV4.num
+                is Inet6Address -> AddressFamily.IPV6.num
+                else -> throw IllegalArgumentException("Unknown InetAddress: $inputAddress")
+            }
+            this[0] = (addressType shr 8 and 0xFF).toByte()
+            this[1] = (addressType shr 0 and 0xFF).toByte()
 
-        val addressType = when (inputAddress) {
-            is Inet4Address -> AddressFamily.IPV4.num
-            is Inet6Address -> AddressFamily.IPV6.num
-            else -> throw IllegalArgumentException("Unknown InetAddress: $inputAddress")
+            System.arraycopy(actualAddressBytes, 0, this, 2, actualAddressBytes.size)
         }
-        outputAddressBytes[0] = (addressType shr 8 and 0xFF).toByte()
-        outputAddressBytes[1] = (addressType shr 0 and 0xFF).toByte()
-
-        System.arraycopy(actualAddressBytes, 0, outputAddressBytes, 2, actualAddressBytes.size)
-        return outputAddressBytes
     }
 }

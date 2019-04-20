@@ -21,8 +21,10 @@ import me.beresnev.kdiameter.extensions.stream.writeByte
 import me.beresnev.kdiameter.extensions.stream.writeFourBytes
 import me.beresnev.kdiameter.extensions.stream.writeThreeBytes
 import me.beresnev.kdiameter.network.message.avp.Avp
+import net.jcip.annotations.ThreadSafe
 import java.io.ByteArrayOutputStream
 
+@ThreadSafe
 object DiameterMessageEncoder {
 
     /** 0               1               2               3
@@ -50,24 +52,22 @@ object DiameterMessageEncoder {
         // Application-Id(4) + HopByHop(4) + EndToEnd(4) == 20
         val messageLength = 20 + encodedAvps.size
 
-        val byteStream = ByteArrayOutputStream()
-        byteStream.writeByte(1) // support only for version 1
-        byteStream.writeThreeBytes(messageLength)
-        byteStream.writeByte(message.commandFlags.getAsAssertedByte())
-        byteStream.writeThreeBytes(message.commandCode)
-        byteStream.writeFourBytes(message.applicationId)
-        byteStream.writeFourBytes(message.hopByHop)
-        byteStream.writeFourBytes(message.endToEnd)
-        byteStream.write(encodedAvps)
-
-        return byteStream.toByteArray()
+        return ByteArrayOutputStream().apply {
+            writeByte(1) // support only for version 1
+            writeThreeBytes(messageLength)
+            writeByte(message.commandFlags.getAsAssertedByte())
+            writeThreeBytes(message.commandCode)
+            writeFourBytes(message.applicationId)
+            writeFourBytes(message.hopByHop)
+            writeFourBytes(message.endToEnd)
+            write(encodedAvps)
+        }.toByteArray()
     }
 
     fun encodeAvps(avps: List<Avp>): ByteArray {
-        val byteStream = ByteArrayOutputStream()
-        avps.forEach { avp -> writeAvp(avp, byteStream) }
-
-        return byteStream.toByteArray()
+        return ByteArrayOutputStream().apply {
+            avps.forEach { avp -> writeAvp(avp, this) }
+        }.toByteArray()
     }
 
     /**
@@ -103,13 +103,15 @@ object DiameterMessageEncoder {
         // AVP Code (4) + flags (1) + AVP Length (3) = 8
         val avpLength = 8 + (if (vendorId != null) 4 else 0) + dataLength
 
-        byteStream.writeFourBytes(avp.code)
-        byteStream.writeByte(avp.avpFlags.getAsAssertedByte())
-        byteStream.writeThreeBytes(avpLength)
-        if (vendorId != null) {
-            byteStream.writeFourBytes(vendorId)
+        byteStream.let {
+            it.writeFourBytes(avp.code)
+            it.writeByte(avp.avpFlags.getAsAssertedByte())
+            it.writeThreeBytes(avpLength)
+            if (vendorId != null) {
+                it.writeFourBytes(vendorId)
+            }
+            it.write(alignedData)
         }
-        byteStream.write(alignedData)
     }
 
     /**
